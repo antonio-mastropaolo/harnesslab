@@ -361,6 +361,7 @@ class JobIn(BaseModel):
     sentinel_ab: bool = False                 # also run each harness with the sentinel enabled as "<id>+sentinel"
     sentinel_only: bool = False               # run each harness ONLY as "<id>+sentinel" (pair with plain cells already in `out`)
     price: Optional[list[float]] = None
+    max_cost_usd: Optional[float] = None      # stop submitting work once the job's ledger cost reaches this
 
 
 JOBS: dict[str, dict] = {}
@@ -369,7 +370,9 @@ _EXEC = ThreadPoolExecutor(max_workers=8)
 
 
 def job_public(j: dict) -> dict:
-    return {k: v for k, v in j.items() if k not in ("_future",)}
+    d = {k: v for k, v in j.items() if k not in ("_future",)}
+    d["spent"] = round(sum((r.get("cost") or 0.0) for r in j.get("results", [])), 6)
+    return d
 
 
 def _harness_by_id(hid: str) -> HarnessConfig:
@@ -408,6 +411,8 @@ def _expand_harnesses(job: dict) -> list[HarnessConfig]:
 
 
 def _run_one(job: dict, cell: dict, task: dict, harness: HarnessConfig, repeat: int, rmodel: S.RiskModel):
+    if job.get("cancel"):
+        return                                    # every cell is submitted up front; a cancel or a spend cap stops the rest here
     out_dir = os.path.join(M.RUNS_ROOT, job["out"])
     run_id = new_run_id()
     seed = _seed_for(job["seed"], task["id"], harness.id, cell["model"], repeat)
@@ -436,6 +441,10 @@ def _run_one(job: dict, cell: dict, task: dict, harness: HarnessConfig, repeat: 
         job["results"].append({"run_id": run_id, "task": task["id"], "harness": harness.id, "model": cell["model"], "repeat": repeat,
                                "hidden_pass": s.hidden_pass, "steps": s.steps, "exit": s.exit_reason, "cost": s.cost_usd,
                                "interventions": s.sentinel_interventions, "max_risk": s.sentinel_max_risk, "boundary": s.boundary_events})
+        cap = job.get("max_cost_usd")
+        if cap is not None and not job.get("cancel") and job_public(job)["spent"] >= cap:
+            job["cancel"] = True
+            job["stop_reason"] = f"spend cap ${cap:.2f} reached"
         BUS.publish("run_end", job=job["id"], run_id=run_id, summary=asdict(s))
     except Exception as e:
         job["done"] += 1
@@ -465,7 +474,7 @@ def _run_job(job: dict):
                     f.result()
                 except Exception:
                     pass
-        job["status"] = "cancelled" if job.get("cancel") else "finished"
+        job["status"] = "stopped" if job.get("stop_reason") else ("cancelled" if job.get("cancel") else "finished")
     except Exception as e:
         job["status"] = "error"
         job["errors"].append(str(e))

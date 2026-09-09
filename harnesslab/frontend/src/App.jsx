@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, createContext, useContext } from 'react'
-import { useFetch, useEvents } from './api'
+import { useFetch, useEvents, STATIC_DATA } from './api'
 import { ThemeCtx } from './ui'
 import { applyTheme, currentTheme } from './theme'
 import CommandCenter from './pages/CommandCenter'
@@ -14,12 +14,14 @@ import Judge from './pages/Judge'
 import RealData from './pages/RealData'
 import Experiment from './pages/Experiment'
 import Patterns from './pages/Patterns'
+import Field from './pages/Field'
 
 export const Ctx = createContext(null)
 export const useApp = () => useContext(Ctx)
 
 const NAV = [
   { id: 'runs', label: 'Command center', hint: 'launch & watch', icon: '◉' },
+  { id: 'field', label: 'The Field', hint: 'every run, one stage', icon: '∷' },
   { id: 'outcome', label: 'Outcome', hint: 'pass@k, pass^k, CIs', icon: '▦' },
   { id: 'harness', label: 'Harness lab', hint: 'the hidden variable', icon: '⚙' },
   { id: 'explorer', label: 'Trajectories', hint: 'ledger, patch, risk', icon: '↝' },
@@ -67,7 +69,9 @@ export default function App() {
   const [theme, setThemeState] = useState(currentTheme)
   const setTheme = (n) => { applyTheme(n); setThemeState(n) }
 
-  const dirs = overview.data?.results || []
+  // a static export lists every dir the server knew, but only carries the ones it was built with
+  const exported = STATIC_DATA?.__meta__?.results
+  const dirs = (overview.data?.results || []).filter(d => !exported || exported.includes(d.name))
   useEffect(() => {
     if (dirs.length && !dirs.find(d => d.name === results)) {
       const pref = dirs.find(d => d.name === 'live') || dirs.find(d => d.name !== 'prerecorded_mock') || dirs[0]
@@ -77,6 +81,13 @@ export default function App() {
   useEffect(() => { localStorage.setItem('hs.results', results) }, [results])
   useEffect(() => { localStorage.setItem('hs.harness', harness) }, [harness])
   useEffect(() => { localStorage.setItem('hs.oracle', oracle) }, [oracle])
+  // The Field (an iframe, same origin) writes hs.oracle when its own chips are pressed; `storage` only fires in *other*
+  // documents, so this is exactly the cross-document half of keeping the two in step.
+  useEffect(() => {
+    const on = (e) => { if (e.key === 'hs.oracle' && ORACLES.some(o => o[0] === e.newValue)) setOracle(e.newValue) }
+    window.addEventListener('storage', on)
+    return () => window.removeEventListener('storage', on)
+  }, [])
   const dir = dirs.find(d => d.name === results)
   useEffect(() => {
     if (dir && !dir.harnesses.includes(harness)) setHarness(dir.harnesses.includes('baseline') ? 'baseline' : dir.harnesses[0])
@@ -85,7 +96,7 @@ export default function App() {
   const ctx = useMemo(() => ({ overview: overview.data, reloadOverview: overview.reload, events, results, setResults, harness, setHarness, oracle, setOracle, dir, go, route, theme, setTheme }),
     [overview.data, events, results, harness, oracle, dir, route, theme]) // eslint-disable-line
 
-  const Page = { runs: CommandCenter, outcome: Outcome, harness: HarnessLab, explorer: Explorer, sentinel: Sentinel, judge: Judge, integrity: Integrity, experiment: Experiment, patterns: Patterns, real: RealData, report: ReportCard, present: Present }[route.page] || CommandCenter
+  const Page = { runs: CommandCenter, field: Field, outcome: Outcome, harness: HarnessLab, explorer: Explorer, sentinel: Sentinel, judge: Judge, integrity: Integrity, experiment: Experiment, patterns: Patterns, real: RealData, report: ReportCard, present: Present }[route.page] || CommandCenter
   const running = Object.values(events.runs).filter(r => r.status === 'running').length
 
   if (route.page === 'present') return <ThemeCtx.Provider value={theme}><Ctx.Provider value={ctx}><Present /></Ctx.Provider></ThemeCtx.Provider>
@@ -147,7 +158,7 @@ export default function App() {
               </div>
             </div>
           </header>
-          <div className="flex-1 overflow-auto p-5">
+          <div className={route.page === 'field' ? 'flex-1 min-h-0 overflow-hidden' : 'flex-1 overflow-auto p-5'}>
             <Page />
           </div>
         </main>

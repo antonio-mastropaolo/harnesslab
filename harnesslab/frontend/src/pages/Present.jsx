@@ -6,6 +6,7 @@ import Explorer from './Explorer'
 import Sentinel from './Sentinel'
 import Integrity from './Integrity'
 import ReportCard from './ReportCard'
+import { FieldFrame } from './Field'
 
 // Lecture mode for the one-hour lab. The clock and the block names come from LAB_1H.md, so the
 // bar always says where the room should be. `type` is what participants type; `see` is what has to
@@ -28,9 +29,8 @@ const SLIDES = [
   {
     part: 'A', clock: '0:00', kicker: 'a · the cold open', title: 'The same runs, three different answers',
     sub: 'Before anything is installed: switch the oracle and 163 runs change verdict. Press rank, then resample — the leader changes in half of 2,000 resampled task sets. Press flags: 295 runs fail a trajectory test and 165 of those still pass the hidden oracle.',
-    see: ['the leader changes in ~50% of 2,000 task sets', 'six of eight systems are indistinguishable from first'],
-    note: 'Open the Field on the projector for this one: http://127.0.0.1:8765/field — oracle chips, then r to rank, b to resample, f for flags. You measure all of this yourselves in the next hour.',
-    body: Outcome,
+    note: 'The Field is on this slide. Oracle chips, then r to rank, b to resample, f for flags — click inside it first; the arrow keys still turn the page. You measure all of this yourselves in the next hour.',
+    field: true,
   },
   {
     part: 'A', clock: '0:02', kicker: 'what part one established', title: 'Six things the lab assumes you accept',
@@ -164,8 +164,10 @@ export default function Present() {
       if (e.key === 'End') setI(SLIDES.length - 1)
       if (e.key === 'Escape') go('runs')
     }
+    const onMsg = (e) => { if (e.data && e.data.type === 'field:key') on({ key: e.data.key }) }   // the embedded Field forwards page keys
     window.addEventListener('keydown', on)
-    return () => window.removeEventListener('keydown', on)
+    window.addEventListener('message', onMsg)
+    return () => { window.removeEventListener('keydown', on); window.removeEventListener('message', onMsg) }
   }, [go])
 
   const s = SLIDES[Math.min(i, SLIDES.length - 1)]
@@ -216,7 +218,7 @@ export default function Present() {
       </div>
 
       {/* ── slide body: type / see panels, a list, and/or a live console page ── */}
-      <div className="flex-1 overflow-auto p-8 present-body">
+      <div className={`flex-1 min-h-0 overflow-auto p-8 present-body${s.field ? ' flex flex-col' : ''}`}>
         {(s.type || s.see) && (
           <div className="grid gap-5 mb-6 max-w-[1400px]" style={{ gridTemplateColumns: s.type && s.see ? '1fr 1fr' : '1fr' }}>
             {s.type && (
@@ -263,6 +265,7 @@ export default function Present() {
           </div>
         )}
 
+        {s.field && <div className="flex-1 min-h-[620px]"><FieldFrame className="w-full h-full block border-0 rounded-lg" /></div>}
         {Body && <Body />}
       </div>
 

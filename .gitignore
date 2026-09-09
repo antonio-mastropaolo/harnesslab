@@ -54,5 +54,4 @@ harnesslab/Archive.zip
 *.bundle
 
 # build artifacts
-harnesslab/frontend/dist/
 *.orig

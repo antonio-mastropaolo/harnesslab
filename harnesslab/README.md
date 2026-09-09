@@ -23,7 +23,8 @@ The UI is prebuilt in `harnesslab/frontend/dist`. To hack on it: `cd harnesslab/
 
 | page | what it shows | lab exercise |
 |---|---|---|
-| **Command center** | launch matrix (OpenRouter model chips + any id, harness chips, task chips, repeats, parallelism), sentinel settings, A/B toggle; live run grid with per-step tool glyphs, risk meter, interventions, PASS/fail as they land | 0 |
+| **Command center** | launch matrix (OpenRouter model chips + any id, harness chips, task chips, repeats, parallelism, a spend cap), sentinel settings, A/B toggle; live run grid with per-step tool glyphs, risk meter, interventions, PASS/fail as they land | 0 |
+| **The Field** | every run of the selected results dir on one stage: switch the oracle and watch verdicts re-judge in front of you, **rank**, **resample** 2,000 task sets and watch the leader change, **flags** for runs that fail a trajectory test yet pass the oracle. Follows the console's oracle and theme; also slide 2 of Present, and embedded whole in `--export` | 1 |
 | **Outcome** | outcome grid, pass@k vs pass^k curve, task-bootstrap CI, flip rate, strengthened-oracle pass@1, exit reasons, conduct rates | 1 |
 | **Harness lab** | every (model, harness) cell side by side with "which columns move" shading; paired bootstrap vs a baseline; model-family × harness heatmap with a harness-sensitivity column; a harness editor that saves `harnesses/<id>.json` | 2 |
 | **Trajectories** | filterable run table → one run: risk-over-trajectory chart (replay + recorded live verdicts), interventions, the ledger as a timeline, the patch, the issue, the harness; tick two runs to compare them side by side (patch-line overlap, both timelines, both risk curves) | 1, 3 |

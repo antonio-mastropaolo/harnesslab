@@ -8,7 +8,7 @@ const TOOL_GLYPH = { list_files: '≡', read_file: '👁', write_file: '✎', ed
 export default function CommandCenter() {
   const { overview, events, results, setResults, reloadOverview, go } = useApp()
   const models = useFetch('/models', [overview?.key_present])
-  const [sel, setSel] = useState({ models: ['mock'], harnesses: ['baseline'], tasks: [], repeats: 3, parallel: 4 })
+  const [sel, setSel] = useState({ models: ['mock'], harnesses: ['baseline'], tasks: [], repeats: 3, parallel: 4, max_cost_usd: 10 })
   const [out, setOut] = useState('live')
   const [sentinel, setSentinel] = useState({ enabled: true, mode: 'intervene', threshold: 0.6, llm: { enabled: false, model: 'openai/gpt-5-mini' } })
   const [ab, setAb] = useState(true)
@@ -42,7 +42,7 @@ export default function CommandCenter() {
   async function launch() {
     setBusy(true); setErr('')
     try {
-      await api('/jobs', { method: 'POST', body: { out, models: sel.models, harnesses: sel.harnesses, tasks: sel.tasks, repeats: sel.repeats, parallel: sel.parallel, sentinel, sentinel_ab: ab } })
+      await api('/jobs', { method: 'POST', body: { out, models: sel.models, harnesses: sel.harnesses, tasks: sel.tasks, repeats: sel.repeats, parallel: sel.parallel, max_cost_usd: sel.max_cost_usd, sentinel, sentinel_ab: ab } })
       setResults(out)
     } catch (e) { setErr(e.message) }
     setBusy(false)
@@ -109,9 +109,10 @@ export default function CommandCenter() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               <label className="text-[11px] text-ink3">repeats<input className="input mt-1" type="number" min={1} max={20} value={sel.repeats} onChange={e => setSel(s => ({ ...s, repeats: +e.target.value }))} /></label>
               <label className="text-[11px] text-ink3">parallel<input className="input mt-1" type="number" min={1} max={8} value={sel.parallel} onChange={e => setSel(s => ({ ...s, parallel: +e.target.value }))} /></label>
+              <label className="text-[11px] text-ink3" title="the job stops submitting work once its ledger cost reaches this">max spend $<input className="input mt-1" type="number" min={0} step={0.5} value={sel.max_cost_usd} onChange={e => setSel(s => ({ ...s, max_cost_usd: +e.target.value }))} /></label>
               <label className="text-[11px] text-ink3">results dir<input className="input mt-1 mono" value={out} onChange={e => setOut(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))} /></label>
             </div>
             <div className="border-t border-line pt-3 space-y-2">
@@ -146,10 +147,11 @@ export default function CommandCenter() {
             <div className="space-y-1.5">
               {jobs.slice(0, 6).map(j => (
                 <div key={j.id} className="flex items-center gap-2 text-[12px]">
-                  <Badge tone={j.status === 'running' ? 'accent' : j.status === 'finished' ? 'good' : j.status === 'error' ? 'critical' : 'neutral'} dot={j.status === 'running'}>{j.status}</Badge>
+                  <Badge tone={j.status === 'running' ? 'accent' : j.status === 'finished' ? 'good' : j.status === 'error' ? 'critical' : j.status === 'stopped' ? 'warn' : 'neutral'} dot={j.status === 'running'}>{j.status}</Badge>
                   <span className="mono text-ink2">{j.out}</span>
                   <span className="text-ink3">{j.models.map(m => m.split('/').pop()).join(', ')} · {j.harnesses.join(', ')}</span>
-                  <span className="ml-auto tabular-nums text-ink2">{j.done}/{j.total || '?'}</span>
+                  {j.stop_reason && <span className="text-warn-ink">{j.stop_reason}</span>}
+                  <span className="ml-auto tabular-nums text-ink2">{j.done}/{j.total || '?'}{j.spent ? ` · ${fmt.usd(j.spent, 3)}` : ''}</span>
                   {j.status === 'running' && <button className="text-ink3 hover:text-critical" onClick={() => api(`/jobs/${j.id}/cancel`, { method: 'POST' })}>cancel</button>}
                 </div>
               ))}

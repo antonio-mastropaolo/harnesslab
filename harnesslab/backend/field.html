@@ -1,4 +1,4 @@
-<title>AgentLab Field</title>
+<title>The Field · harnesslab</title>
 <!-- No webfont link. The exported Field must open with zero network requests, and a Google
      Fonts stylesheet is a request. The deck faces are named first in --sans/--mono below and
      degrade to the system stack where they are not installed. -->
@@ -11,27 +11,34 @@
   --passBg:rgba(127,214,166,.16);--failBg:rgba(232,136,107,.16);--ABg:rgba(185,151,91,.16);--BBg:rgba(111,179,232,.16);--amberBg:rgba(217,164,65,.14);
   --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;--mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;--serif:"Archivo",Georgia,serif;
 }
+:root[data-theme="light"]{
+  --bg:#FFFFFF;--bg2:#F1F2F0;--panel:#F1F2F0;--line:#DDDDDD;--line2:#C2C6C0;
+  --ink:#111111;--ink2:#333333;--muted:#666666;--faint:#9A9A9A;
+  --pass:#115740;--fail:#B8451A;--unres:#C2C6C0;--A:#8A6D33;--B:#1F5FC4;--amber:#9A6600;
+  --passBg:rgba(17,87,64,.12);--failBg:rgba(184,69,26,.12);--ABg:rgba(138,109,51,.14);--BBg:rgba(31,95,196,.12);--amberBg:rgba(154,102,0,.12);
+}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
 #app{display:grid;grid-template-rows:50px 1fr 76px;height:100vh;position:relative}
 /* top */
 .top{display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--bg2);white-space:nowrap}
 @media (max-width:1560px){.top{gap:8px}.top .lbl,.btn kbd{display:none}}
-.wm{font:600 12px/1 var(--mono);letter-spacing:.22em;color:#FFFFFF}
+.wm{font:600 12px/1 var(--mono);letter-spacing:.22em;color:var(--ink)}
 .wm i{display:inline-block;width:8px;height:8px;background:var(--pass);border-radius:50%;margin-right:9px;vertical-align:0}
-.state{font:11.5px/1 var(--mono);color:#FFFFFF;letter-spacing:.02em}
-.state b{color:#FFFFFF;font-weight:600}
+.state{font:11.5px/1 var(--mono);color:var(--ink);letter-spacing:.02em}
+.state b{color:var(--ink);font-weight:600}
 .sp{flex:1}
-.lbl{font:10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#FFFFFF}
+.lbl{font:10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
 .seg{display:flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
-.seg button{background:transparent;border:0;border-right:1px solid var(--line2);color:#FFFFFF;font:500 12px var(--sans);padding:7px 13px;cursor:pointer}
+.seg button{background:transparent;border:0;border-right:1px solid var(--line2);color:var(--ink);font:500 12px var(--sans);padding:7px 13px;cursor:pointer}
 .seg button:last-child{border-right:0}
-.seg button.on{background:#FFFFFF;color:var(--bg)}
+.seg button.on{background:var(--ink);color:var(--bg)}
 .seg button:focus-visible,.btn:focus-visible{outline:2px solid var(--A);outline-offset:1px}
-.btn{background:transparent;border:1px solid var(--line2);color:#FFFFFF;font:500 12px var(--sans);padding:7px 12px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
-.btn kbd{font:10px var(--mono);color:#FFFFFF;opacity:.7;border:1px solid var(--line2);border-radius:3px;padding:1px 4px}
-.btn.k{background:#FFFFFF;color:var(--bg);border-color:#FFFFFF}
+.btn{background:transparent;border:1px solid var(--line2);color:var(--ink);font:500 12px var(--sans);padding:7px 12px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn kbd{font:10px var(--mono);color:var(--ink);opacity:.7;border:1px solid var(--line2);border-radius:3px;padding:1px 4px}
+.btn.k{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .btn.k kbd{color:var(--bg);border-color:rgba(0,0,0,.3)}
 .btn:disabled{opacity:.45;cursor:default}
 /* stage */
@@ -146,7 +153,7 @@ svg .badge{font-family:var(--mono);font-size:10px;fill:var(--fail)}
 
 <div id="app">
   <div class="top">
-    <span class="wm"><i></i>AGENT LAB · FIELD</span>
+    <span class="wm"><i></i>HARNESSLAB · FIELD</span>
     <span class="state" id="state"></span>
     <span class="sp"></span>
     <span class="lbl">oracle</span>
@@ -180,7 +187,18 @@ svg .badge{font-family:var(--mono);font-size:10px;fill:var(--fail)}
 "use strict";
 // ============================================================ data
 const DATA = JSON.parse(document.getElementById("data").textContent);
-const LIVE = !!DATA.live;   // served by `python -m harnesslab.core.serve`: /api/bundle is the source and runs can be launched from here
+const LIVE = !!DATA.live;   // served by `python -m harnesslab`: /api/bundle is the source and the field grows while a job runs
+const RES_DIR = DATA.results || "prerecorded_mock";
+const API = { bundle: "/api/bundle?results=" + encodeURIComponent(RES_DIR), status: "/api/status?results=" + encodeURIComponent(RES_DIR) };
+// Theme and oracle follow the console. Same origin, so localStorage is shared and `storage` fires here for
+// every change made in the parent document (and there for every change made here).
+const THEME_KEY = "hs.theme", ORACLE_KEY = "hs.oracle", NAV_KEYS = ["ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " "];
+const O_IN = { visible_pass: "v", hidden_pass: "hd", strong_pass: "s" }, O_OUT = { v: "visible_pass", hd: "hidden_pass", s: "strong_pass" };
+function readOracle() { try { return localStorage.getItem(ORACLE_KEY); } catch (e) { return null; } }
+function writeOracle(o) { try { if (localStorage.getItem(ORACLE_KEY) !== O_OUT[o]) localStorage.setItem(ORACLE_KEY, O_OUT[o]); } catch (e) {} }
+function applyTheme() { try { document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || "dark"; } catch (e) {} }
+applyTheme();
+window.addEventListener("storage", e => { if (e.key === THEME_KEY) applyTheme(); else if (e.key === ORACLE_KEY && O_IN[e.newValue]) setOracle(O_IN[e.newValue]); });
 const OK = { v: "visible", hd: "hidden", s: "strengthened" };
 let RUNS = [], TASKS = [], SYSTEMS = [], bySys = {}, RESULTS = [], HARN = {}, REP = { n: 1, cols: 1, rows: 1 };
 
@@ -361,7 +379,7 @@ function paintFlags() {
 
 // ---------------- oracle switch: re-judge every dot, in front of you
 function setOracle(o) {
-  if (o === S.oracle) return; const from = S.oracle; S.prevOracle = from; S.oracle = o;
+  if (o === S.oracle) return; const from = S.oracle; S.prevOracle = from; S.oracle = o; writeOracle(o);
   document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.o === o));
   const changed = RUNS.filter(r => !!r[from] !== !!r[o]); const lost = changed.filter(r => r[from] && !r[o]).length;
   const byH = {}; changed.forEach(r => byH[r.h] = (byH[r.h] || 0) + 1); const top = Object.entries(byH).sort((a, b) => b[1] - a[1])[0];
@@ -542,7 +560,7 @@ let VERSION = null, JOBS = [], INFLIGHT = 0, POLLING = false;
 async function poll() {
   if (POLLING) return; POLLING = true;
   try {
-    const st = await (await fetch("/api/status")).json();
+    const st = await (await fetch(API.status)).json();
     JOBS = st.jobs || []; INFLIGHT = (st.running || []).length;
     if (VERSION !== null && st.version !== VERSION) await refreshRuns();
     VERSION = st.version;
@@ -553,7 +571,7 @@ async function poll() {
   POLLING = false;
 }
 async function refreshRuns() {
-  const fresh = load(compactBundle(await (await fetch("/api/bundle")).json()));
+  const fresh = load(compactBundle(await (await fetch(API.bundle)).json()));
   const ids = new Set(RUNS.map(r => r.id)); Object.keys(DOT).forEach(id => { if (!ids.has(id)) { DOT[id].el.remove(); delete DOT[id]; } });
   fresh.forEach(r => dotFor(r));
   S.order = sysOrder(S.oracle);
@@ -612,15 +630,15 @@ async function launch() {
     $("r_msg").textContent = `job ${j.id} started`; log(`launched job ${j.id}`, j.cmd); toast(`job ${j.id} started · the field grows as runs land`); setTimeout(poll, 800);
   } catch (e) { $("r_msg").textContent = "error: " + e.message; }
 }
-async function cancelJob(id) { try { await fetch("/api/jobs/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); log(`cancelled job ${id}`, ""); setTimeout(poll, 500); } catch (e) { console.warn(e); } }
+async function cancelJob(id) { try { await fetch("/api/jobs/" + encodeURIComponent(id) + "/cancel", { method: "POST" }); log(`cancelled job ${id}`, ""); setTimeout(poll, 500); } catch (e) { console.warn(e); } }
 function renderJobs() {
   const el = $("r_jobs"); if (!el) return;
   if (!JOBS.length) { el.innerHTML = `<div class="hint">no job launched from here yet</div>`; return; }
   el.innerHTML = `<div class="jobs">` + JOBS.slice().reverse().map(j => { const pct = j.total ? Math.round(100 * j.done / j.total) : 0;
     return `<div class="job ${j.status === "running" ? "run" : ""}"><div class="jh"><b>${esc(j.id)}</b><span class="js">${esc(j.status)}</span>${j.status === "running" ? `<button class="btn small" data-cancel="${esc(j.id)}">cancel</button>` : ""}</div>
-      <div class="jc">${esc(j.cmd)}</div>
+      <div class="jc">${esc(j.cmd || [(j.models || []).join(", "), (j.harnesses || []).join(", "), j.repeats ? j.repeats + " repeats" : "", j.stop_reason || ""].filter(Boolean).join(" · "))}</div>
       <div class="jp"><span style="width:${pct}%"></span></div>
-      <div class="jm">${j.total ? `${j.done}/${j.total} runs` : "starting"}${j.eta_s != null ? ` · eta ${Math.round(j.eta_s / 60)} min` : ""}${j.elapsed_s != null ? ` · ${Math.round(j.elapsed_s)} s` : ""}${j.spent ? ` · $${Number(j.spent).toFixed(4)} so far` : ""} · → ${esc(j.out)}</div></div>`; }).join("") + `</div>`;
+      <div class="jm">${j.total ? `${j.done}/${j.total} runs` : "starting"}${j.eta_s != null ? ` · eta ${Math.round(j.eta_s / 60)} min` : ""}${(() => { const t = j.elapsed_s != null ? j.elapsed_s : (j.created_at ? (j.finished_at || Date.now() / 1000) - j.created_at : null); return t != null ? ` · ${Math.round(t)} s` : ""; })()}${j.spent ? ` · $${Number(j.spent).toFixed(4)} so far` : ""} · → ${esc(j.out)}</div></div>`; }).join("") + `</div>`;
 }
 document.addEventListener("click", e => { const c = e.target.closest("[data-cancel]"); if (c) cancelJob(c.dataset.cancel); });
 
@@ -641,16 +659,19 @@ $("b_flags").addEventListener("click", () => { S.flags = !S.flags; $("b_flags").
 $("legend").addEventListener("click", e => { const c = e.target.closest("[data-pred]"); if (!c) return; const id = c.dataset.pred; S.preds.has(id) ? S.preds.delete(id) : S.preds.add(id); paintFlags(); if (S.mode === "cell") layoutCell(S.sel.sys, S.sel.task, false); });
 $("b_log").addEventListener("click", () => { S.logOpen = !S.logOpen; $("log").classList.toggle("open", S.logOpen); $("b_log").classList.toggle("k", S.logOpen); });
 document.addEventListener("keydown", e => { if (e.target.matches("input,textarea")) return;
+  if (window.parent !== window && NAV_KEYS.includes(e.key)) { e.preventDefault(); window.parent.postMessage({ type: "field:key", key: e.key }, "*"); return; }   // only a key name crosses; the receiver checks the shape
   if (e.key === "o") setOracle(S.oracle === "v" ? "hd" : S.oracle === "hd" ? "s" : "v");
-  else if (e.key === "r") { closePanels(); layoutRank(true); } else if (e.key === "b") resample(); else if (e.key === "Escape") reset(); else if (e.key === "l") $("b_log").click(); else if (e.key === "f") $("b_flags").click(); else if (e.key === "n" && LIVE) showRun(); });
+  else if (e.key === "r") { closePanels(); layoutRank(true); } else if (e.key === "b") resample(); else if (e.key === "Escape") reset(); else if (e.key === "l") $("b_log").click(); else if (e.key === "f") $("b_flags").click(); else if (e.key === "n" && LIVE && DATA.launch) showRun(); });
 window.addEventListener("resize", () => { measure(); if (S.mode === "field") layoutField(false); else if (S.mode === "rank") layoutRank(false); else layoutCell(S.sel.sys, S.sel.task, false); });
 
 // ============================================================ boot
 function boot(data) {
-  measure(); load(data); RUNS.forEach(r => dotFor(r)); S.order = sysOrder("hd"); layoutField(true, true);
-  log(`loaded ${RUNS.length} runs`, `${RESULTS.join(" + ")} · ${SYSTEMS.length} systems · ${TASKS.length} tasks · hidden oracle${LIVE ? " · live from harnesslab.core.serve" : ""}`);
+  measure(); load(data); RUNS.forEach(r => dotFor(r));
+  const want = O_IN[readOracle()]; if (want && want !== S.oracle) { S.oracle = want; document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.o === want)); }
+  S.order = sysOrder(S.oracle); layoutField(true, true);
+  log(`loaded ${RUNS.length} runs`, `${RESULTS.join(" + ")} · ${SYSTEMS.length} systems · ${TASKS.length} tasks · ${OK[S.oracle]} oracle${LIVE ? " · live from harnesslab" : ""}`);
 }
-if (LIVE) { $("b_run").hidden = false; fetch("/api/bundle").then(r => r.json()).then(b => { boot(compactBundle(b)); VERSION = null; poll(); setInterval(poll, 2500); }).catch(e => { $("state").innerHTML = "could not reach /api/bundle — is harnesslab.core.serve running?"; }); }
+if (LIVE) { $("b_run").hidden = !DATA.launch; fetch(API.bundle).then(r => r.json()).then(b => { boot(compactBundle(b)); VERSION = null; poll(); setInterval(poll, 2500); }).catch(e => { $("state").innerHTML = "could not reach /api/bundle — is python -m harnesslab running?"; }); }
 else boot(DATA.bundle ? compactBundle(DATA.bundle) : DATA);
 window.__field = { S, pass1, taskTable, rankOf, lcg, paired, compactBundle, get RUNS() { return RUNS; }, get bySys() { return bySys; }, get REP() { return REP; }, get JOBS() { return JOBS; } };
 })();

@@ -2,8 +2,8 @@
 
 > **Platform note (2026-09-08).** This run sheet now targets **harnesslab 0.3.0**, not the older
 > `harnesslab.core.serve` console. Page names changed: Board → **Runs**, Comparison folded into
-> **Harness lab**, Trajectories → **Explorer**. The Field is not yet ported to harnesslab — open
-> `web/field.html` from the agent-lab checkout separately if you want the rank/resample cold-open.
+> **Harness lab**, Trajectories → **Explorer**. The Field is the console's own page now (**The Field**, second in
+> the nav, and slide 2 of Present) — no separate file to open; it follows the console's results dir, oracle and theme.
 > The lecture deck is now the console's own **Present** page (16 slides, follows this clock).
 > Participants can skip setup entirely with the offline bundle: `python -m harnesslab --export lab.html`.
 

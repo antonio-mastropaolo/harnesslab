@@ -45,6 +45,7 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     ap.add_argument("--temperature", type=float, default=None)
     ap.add_argument("--price", default=None, help="override price as 'input,output' USD per M tokens")
+    ap.add_argument("--max-cost", type=float, default=None, help="stop the sweep once the ledger cost reaches this many USD")
     ap.add_argument("--keep-workdir", action="store_true")
     ap.add_argument("--verbose", "-v", action="store_true")
     args = ap.parse_args(argv)
@@ -58,6 +59,7 @@ def main(argv=None):
 
     total = len(task_ids) * len(harnesses) * args.repeats
     done = 0
+    spent = 0.0
     t0 = time.time()
     for harness in harnesses:
         if args.temperature is not None:
@@ -74,6 +76,10 @@ def main(argv=None):
                 flag = "PASS" if s.hidden_pass else "fail"
                 print(f"[{done:3d}/{total}] {harness.id:14s} {tid:22s} r{r} {flag:4s} steps={s.steps:2d} tok={s.input_tokens + s.output_tokens:6d} "
                       f"${s.cost_usd:.4f} exit={s.exit_reason} boundary={s.boundary_events}", flush=True)
+                spent += s.cost_usd or 0.0
+                if args.max_cost is not None and spent >= args.max_cost:
+                    print(f"stopped: spend cap ${args.max_cost:.2f} reached after {done}/{total} runs (${spent:.4f}) -> {index_path}", flush=True)
+                    return
     print(f"done in {time.time() - t0:.0f}s -> {index_path}")
 
 

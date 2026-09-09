@@ -46,7 +46,8 @@ def _urls(client, dirs: list[str], n_runs: int) -> list[str]:
                 f"/api/results/{d}/experiment", f"/api/real/{d}/analysis",
                 f"/api/harness/versions?dir={d}", f"/api/harness/list?dir={d}",
                 f"/api/fork/{d}/pairs?limit=80",
-                f"/api/sentinel/leaderboard?dir={d}&k=10%2C15%2C20&threshold=0.6"]
+                f"/api/sentinel/leaderboard?dir={d}&k=10%2C15%2C20&threshold=0.6",
+                f"/api/field/html?results={d}"]
         for h in harnesses:
             out += [f"/api/results/{d}/runs?harness={q(h)}",
                     f"/api/results/{d}/metrics?baseline={q(h)}",
