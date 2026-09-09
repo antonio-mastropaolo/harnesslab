@@ -47,17 +47,17 @@ const SLIDES = [
   {
     part: 'B', clock: '0:03', kicker: 'b · setup · nine minutes', title: 'Four steps, and nobody moves on until every screen matches',
     sub: 'On a stock Mac the command is python3, not python. If port 8765 is taken, add --port 8766.',
-    type: ['python3 --version            # 3.10 or newer', 'cd harnesslab', 'python3 -m harnesslab --no-browser', 'open http://127.0.0.1:8765'],
-    see: ['the console loads on the Runs page', '640 pre-recorded runs listed under prerecorded_mock'],
+    type: ['python3 --version            # 3.10 or newer', 'cd harnesslab', 'python3 -m harnesslab        # opens the console on Command center', 'launch: mock + baseline preselected, only t01_slugify checked, repeats 2, out "mine" → Launch 4 runs'],
+    see: ['four runs under Live runs ending PASS — two baseline, two baseline+sentinel (A/B is on)', 'Jobs reads "finished · mine"; results selector offers "mine · 4 runs"', 'click The Field in the left rail'],
     note: 'Offline fallback: double-click lab.html — the whole console, no Python, no server.',
   },
   {
     part: 'B', clock: '0:10', kicker: 'checkpoint', title: 'Everyone should now have all four of these',
     list: [
-      'The console open on the Runs page.',
-      'prerecorded_mock selected, 640 runs.',
-      'The oracle chips visible in the top bar: visible · hidden · strengthened.',
-      'The Outcome page rendering a grid, not an empty state.',
+      'The console open on The Field page.',
+      'Results dir set to mine — 4 runs.',
+      'Four runs ending PASS: two baseline, two baseline+sentinel.',
+      'The Jobs card reading "finished · mine".',
     ],
     note: 'Do not start exercise one until every hand is down.',
   },
@@ -178,7 +178,7 @@ export default function Present() {
     <div className="h-full flex flex-col" style={{ background: 'var(--t-bg)' }}>
       {/* ── W&M deck chrome: the same green bar and gold rule as the morning deck ── */}
       <div className="shrink-0 relative flex items-stretch"
-           style={{ background: 'var(--wm-green-800)', boxShadow: '0 10px 26px rgba(11,46,34,.35)' }}>
+           style={{ background: 'var(--deck-ground)', borderBottom: '1px solid var(--deck-rule)' }}>
         <div className="flex items-center px-8 mono text-[13px] whitespace-nowrap"
              style={{ color: 'var(--wm-gold)', borderRight: '1px solid var(--wm-green-500)' }}>~/lab</div>
         <div className="flex items-stretch">
