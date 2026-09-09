@@ -45,7 +45,7 @@ or a local model via Ollama (`--base-url http://localhost:11434/v1`).
 Budget: a run is 4-15 model calls; the transcript is re-sent on every call, so a frontier model sees 20-60k input
 tokens per run and writes 1-5k. At Sonnet-5 / GPT-5.6 prices that is $0.05-0.15 per run; the full lab plan (about
 60 live runs plus the judge exercise) is $5-10 per participant. Opus-class models cost about 2.5x. Use `--price in,out`
-(USD per million tokens) if your model is not in `agentlab/providers.py::PRICES`.
+(USD per million tokens) if your model is not in `harnesslab/core/providers.py::PRICES`.
 
 Safety: the sandbox is a scratch copy of the task repository plus a command policy, not a security boundary.
 Point a real model at it inside a container or VM if you care about the host. Network, privilege escalation,
@@ -76,6 +76,7 @@ exercises/ex1..ex8   the lab, in order; every script takes --results <dir> and -
 trajectory_tests/    unittest assertions over trajectories (exercise 3)
 data/runs/prerecorded_mock/        480 offline runs: 8 tasks x 6 harnesses x 10 repeats
 data/runs/prerecorded_mock_weak/   160 offline runs: 8 tasks x 2 harnesses x 10 repeats (model 'mock-weak', for exercise 8)
+web/                 the legacy stdlib console's single-page app (superseded by harnesslab/frontend)
 harnesslab/core/console.py, serve.py   the legacy console's bundle builder and stdlib server / static exporter
 solutions/           reference patches and instructor notes (spoilers)
 tests_agentlab/      self-tests for the infrastructure: python -m unittest discover -s tests_agentlab
