@@ -275,16 +275,14 @@ def report_md(name: str, harness: str = "baseline"):
 
 # --------------------------------------------------------------------------- models (OpenRouter)
 CURATED = [
+    {"id": "openai/gpt-5.6-luna", "family": "OpenAI", "tier": "small"},
+    {"id": "google/gemini-2.5-flash-lite", "family": "Google", "tier": "small"},
+    {"id": "google/gemini-3.8-flash", "family": "Google", "tier": "mid"},
+    {"id": "deepseek/deepseek-v4-flash", "family": "DeepSeek", "tier": "small"},
+    {"id": "qwen/qwen3.8-27b", "family": "Qwen (open weights)", "tier": "mid"},
+    {"id": "z-ai/glm-5.3-flash", "family": "Zhipu (open weights)", "tier": "small"},
     {"id": "anthropic/claude-haiku-4.5", "family": "Anthropic", "tier": "small"},
-    {"id": "anthropic/claude-sonnet-4.5", "family": "Anthropic", "tier": "mid"},
     {"id": "openai/gpt-5-mini", "family": "OpenAI", "tier": "small"},
-    {"id": "openai/gpt-5", "family": "OpenAI", "tier": "mid"},
-    {"id": "google/gemini-2.5-flash", "family": "Google", "tier": "small"},
-    {"id": "deepseek/deepseek-chat-v3.1", "family": "DeepSeek", "tier": "mid"},
-    {"id": "qwen/qwen3-coder", "family": "Qwen", "tier": "mid"},
-    {"id": "meta-llama/llama-4-maverick", "family": "Meta", "tier": "mid"},
-    {"id": "mistralai/devstral-2512", "family": "Mistral", "tier": "small"},
-    {"id": "x-ai/grok-4.6", "family": "xAI", "tier": "small"},
     {"id": "mock", "family": "Mock (offline)", "tier": "free"},
 ]
 _MODEL_CACHE = {"ts": 0, "data": None}
