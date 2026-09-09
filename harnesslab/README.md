@@ -1,8 +1,8 @@
-# harnesslab — the web platform for agentlab
+# harnesslab — the web platform
 
 *The agent won't hold still; the measurement should.*
 
-A local web app over the lab's `agentlab` harness. It launches cells (model × harness × tasks × repeats)
+A local web app over the lab's measurement engine, `harnesslab.core`. It launches cells (model × harness × tasks × repeats)
 against the mock agent or **any OpenRouter model**, streams every ledger span to the browser while the run
 is happening, and adds a **sentinel**: an early-warning module that scores the partial trajectory at every
 step and can nudge, block or abort the agent *before* it submits.
@@ -37,7 +37,7 @@ The UI is prebuilt in `harnesslab/frontend/dist`. To hack on it: `cd harnesslab/
 
 Everything reads and writes the same `data/runs/<dir>/index.jsonl` + per-run `ledger.jsonl` that
 `harnesslab.core.runner` and the exercise scripts use. Numbers agree with the scripts because the API calls the same
-functions in `agentlab/analysis.py`.
+functions in `harnesslab/core/analysis.py`.
 
 ## The sentinel
 
@@ -53,7 +53,7 @@ functions in `agentlab/analysis.py`.
 3. **LLM sentinel** (optional) — a second model via OpenRouter reads the compact partial trajectory and
    returns `{risk, pattern, rationale, nudge}`; only called when the cheap layers ask for it.
 
-The hook runs **before the pending tool calls execute** (`agentlab/harness.py::run_task(step_hook=...)`), so
+The hook runs **before the pending tool calls execute** (`harnesslab/core/harness.py::run_task(step_hook=...)`), so
 it can answer a `submit` or an `rm -rf` with a block instead of letting it run, append a nudge after the
 tools run, re-prompt a model that stopped calling tools, or abort. Every verdict is a `sentinel` span in the
 ledger; `RunSummary` gains `sentinel_interventions` and `sentinel_max_risk`; the exit reason
@@ -125,7 +125,7 @@ Harness lab heatmap shows.
 `--provider openai --base-url https://openrouter.ai/api/v1` under the hood (`OpenAIProvider`). The platform
 reads `OPENROUTER_API_KEY` (or you paste a key in the Command center; it stays in memory for the session).
 `/api/models` enriches a curated list of model families with OpenRouter's live catalogue (prices, context)
-and accepts any id you type. Prices for unknown models fall back to `agentlab/providers.py::PRICES`; pass
+and accepts any id you type. Prices for unknown models fall back to `harnesslab/core/providers.py::PRICES`; pass
 `price` in the job if you need exact cost.
 
 ## API (all JSON)
@@ -139,7 +139,7 @@ and accepts any id you type. Prices for unknown models fall back to `agentlab/pr
 `POST /api/sentinel/replay` · `GET /api/sentinel/replay_all/{dir}` · `POST /api/sentinel/activate` ·
 `POST /api/real/import` · `GET /api/real/status` · `GET /api/real/{dir}/analysis` · `POST /api/judge/run` · `GET /api/judge`
 
-## Changes to agentlab (all backward compatible)
+## Changes to harnesslab.core (all backward compatible)
 
 - `ledger.py`: `Ledger(..., listener=None)` calls `listener(rec)` after every span; `RunSummary` gets
   `sentinel_interventions`, `sentinel_max_risk`, `sentinel_cost_usd`; span kind `sentinel` documented.

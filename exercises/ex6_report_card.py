@@ -4,7 +4,7 @@ Everything the lecture asked for, produced from a results directory: the cell
 (model, harness, tasks, protocol), outcome distributions with uncertainty,
 conduct, cost, and the two integrity checks. This is the recipe as code.
 
-The card itself lives in `agentlab/reportcard.py` so that this script, the platform's
+The card itself lives in `harnesslab/core/reportcard.py` so that this script, the platform's
 Report card page and its `/report.md` download are the same implementation — three copies
 of "what pass@1 means" is three chances to disagree.
 

@@ -19,7 +19,7 @@ No third-party dependencies. Python 3.10+. `matplotlib` is optional (figures).
 
 ```bash
 cd lab
-python -m harnesslab run --provider mock --tasks t01_slugify --repeats 3 --out data/runs/smoke -v
+python -m harnesslab run --provider mock --tasks t01_slugify --repeats 3 --out data/runs/mine -v
 python exercises/ex1_variance.py            # uses the pre-recorded data in data/runs/prerecorded_mock
 python -m harnesslab                         # the platform: http://127.0.0.1:8765 (pip install -r harnesslab/requirements.txt)
 ```
@@ -37,7 +37,7 @@ python scripts/frontier_batch.py --estimate     # a models x harnesses x tasks x
 ```
 
 With `--provider openrouter` the cost recorded per call is the exact charge the endpoint reports (`usage.cost`);
-with the other providers it is tokens × the price table in `agentlab/providers.py`.
+with the other providers it is tokens × the price table in `harnesslab/core/providers.py`.
 
 Any OpenAI-compatible endpoint works: `--provider openai --base-url https://openrouter.ai/api/v1 --model ...`,
 or a local model via Ollama (`--base-url http://localhost:11434/v1`).
@@ -62,13 +62,13 @@ alphabet to work over sets of runs (sequences, transition matrices, divergence, 
 unittests) and **Experiment** fits the exercise-8 factorial for whatever is in the filter. Dark and light (projector) themes;
 Present mode is a lecture view over the live pages. See `harnesslab/README.md`.
 
-The earlier stdlib **AgentLab Console** (`python -m harnesslab.core.serve`, port 8766, `--export me.html`) still ships as a legacy
+The earlier stdlib console (`python -m harnesslab.core.serve`, port 8766, `--export me.html`) still ships as a legacy
 UI; harnesslab supersedes it and its remaining unique views are being ported before it is removed.
 
 ## Layout
 
 ```
-agentlab/            the harness (see agentlab/__init__.py for the module map)
+harnesslab/core/     the measurement engine (see harnesslab/core/__init__.py for the module map)
 harnesslab/           the web platform: FastAPI backend, sentinel module, prebuilt React UI
 tasks/<id>/          issue.md, repo/ (what the agent sees), hidden_tests/, hidden_tests_strong/, task.json
 harnesses/*.json     six harness configurations: same model, different measurement cell
@@ -76,8 +76,7 @@ exercises/ex1..ex8   the lab, in order; every script takes --results <dir> and -
 trajectory_tests/    unittest assertions over trajectories (exercise 3)
 data/runs/prerecorded_mock/        480 offline runs: 8 tasks x 6 harnesses x 10 repeats
 data/runs/prerecorded_mock_weak/   160 offline runs: 8 tasks x 2 harnesses x 10 repeats (model 'mock-weak', for exercise 8)
-web/                 legacy AgentLab Console (single-page app built from web/src by web/build.py); superseded by harnesslab
-agentlab/console.py, agentlab/serve.py   the legacy console's bundle builder and stdlib server / static exporter
+harnesslab/core/console.py, serve.py   the legacy console's bundle builder and stdlib server / static exporter
 solutions/           reference patches and instructor notes (spoilers)
 tests_agentlab/      self-tests for the infrastructure: python -m unittest discover -s tests_agentlab
 ```
@@ -115,7 +114,7 @@ nebius/SWE-agent-trajectories (80,036 SWE-agent runs with resolved labels, CC-BY
 dataset card's resolved-vs-unresolved comparison on the sample, and ranks binary trajectory features by
 Ochiai suspiciousness (spectrum-based fault localisation over runs). `--offline` runs the same analysis on
 the mock ledgers. `--to-console DIR` also writes the streamed trajectories as a results directory (`real_traj.to_results_dir`)
-so the console shows real SWE-agent runs with the same predicates. Parsing lives in `agentlab/real_traj.py`; the attribution in `agentlab/analysis.py`.
+so the console shows real SWE-agent runs with the same predicates. Parsing lives in `harnesslab/core/real_traj.py`; the attribution in `harnesslab/core/analysis.py`.
 
 ## Importing real trajectories
 
