@@ -18,7 +18,7 @@ We will discuss them in the last ten minutes.
 ## The platform: harnesslab
 
 Every exercise below is a command-line script, and every one of them has a page in the platform. Use whichever
-you prefer — they call the same functions in `agentlab/analysis.py`, so the numbers agree by construction. The
+you prefer — they call the same functions in `harnesslab/core/analysis.py`, so the numbers agree by construction. The
 pages are better for exploring; the scripts are better for the hand-in.
 
 ```bash
@@ -53,19 +53,19 @@ the Patterns page's queries — and the tests you generate from them — possibl
 
 ```bash
 cd lab
-python -m harnesslab run --provider mock --tasks t01_slugify --repeats 2 --out data/runs/smoke -v
+python3 -m harnesslab run --provider mock --tasks t01_slugify --repeats 2 --out data/runs/mine -v
 python -m harnesslab                       # the platform: http://127.0.0.1:8765
 ```
 
 You should see two runs, each a handful of steps, ending in `PASS` or `fail`, and the console opening on the
-Board with the pre-recorded runs plus your `smoke` directory. Look inside one run:
+Command center with the pre-recorded runs plus your `mine` directory. Look inside one run:
 
 ```bash
-ls data/runs/smoke/<run_id>/            # ledger.jsonl  summary.json  patch.diff  messages.json
-python -m json.tool data/runs/smoke/<run_id>/summary.json
+ls data/runs/mine/<run_id>/            # ledger.jsonl  summary.json  patch.diff  messages.json
+python -m json.tool data/runs/mine/<run_id>/summary.json
 ```
 
-Now the live agent. Either use the Board's launch
+Now the live agent. Either use Command center's launch
 panel (provider, model, harness files, tasks, repeats; the API key is read from the terminal that started the
 console) or a second terminal:
 
@@ -81,10 +81,10 @@ Frontier models only: `anthropic/claude-sonnet-5`, `openai/gpt-5.6-sol`, `deepse
 `z-ai/glm-5.3` are the recommended ids (about $0.05–0.15 per run; the cost per call is the exact charge
 OpenRouter reports). `anthropic/claude-opus-5` costs about 2.5× and is worth one small comparison, not the
 whole plan. `--provider anthropic` or `--provider openai` with your own keys also work. Both harnesses write
-into `data/runs/live`, so one Board shows both cells. Runs in flight are amber cells. Expected spend for the
+into `data/runs/live`, so one Command center shows both cells. Runs in flight are amber cells. Expected spend for the
 whole afternoon: $5–10 of your $20. The runs take 5–10 minutes; do not wait for them.
 
-While they run, skim `agentlab/harness.py::run_task` (the control loop, 120 lines) and `agentlab/tools.py`
+While they run, skim `harnesslab/core/harness.py::run_task` (the control loop, 120 lines) and `harnesslab/core/tools.py`
 (the tool surface and the policy). Find: where the stopping rule is; where a boundary event is recorded; what
 `context_window` does. You will change all three later.
 
@@ -101,12 +101,12 @@ python exercises/ex1_variance.py --results data/runs/live     # yours, once a fe
 ```
 
 Read the four sections in order: the outcome grid, pass@k versus pass^k, the confidence intervals, and the
-patch/trajectory diversity table. Then the same in the console: on the **Board**, switch the oracle chip from
+patch/trajectory diversity table. Then the same in the console: in the header, switch the oracle chip from
 hidden to strengthened and count the cells that change colour; on **Distribution**, read the per-task table
 (Wilson next to Wald), the two curves, the flip map, and the path-diversity table.
 
 Open a task with a flip (t03_ratelimit): two runs in the same cell with opposite verdicts. Click both cells on
-the Board, then use **Compare two runs** in Trajectories; diff their patches:
+Command center, then use **Compare two runs** in Trajectories; diff their patches:
 
 ```bash
 grep '"t03_ratelimit"' data/runs/prerecorded_mock/index.jsonl | python -c "import sys,json; [print(json.loads(l)['run_id'], json.loads(l)['hidden_pass']) for l in sys.stdin]"
@@ -135,7 +135,7 @@ the unit, and with eight tasks the interval is wide. In the console, **Harness**
 Now make your own harness. In the Harness view's editor (or by copying `harnesses/baseline.json` to
 `harnesses/mine.json`) change one thing: drop `bash`, set `context_window` to 1, set `max_steps` to 4, rewrite
 the system prompt, set `policy` to `permissive`. Predict, in writing, which columns will move. Then launch it
-from the Board (5 repeats on the mock; 3 tasks × 3 repeats live if you have a key and time), and compare
+from Command center (5 repeats on the mock; 3 tasks × 3 repeats live if you have a key and time), and compare
 A = `baseline`, B = yours:
 
 ```bash
@@ -151,9 +151,9 @@ shape of that result in miniature.
 
 ```bash
 python exercises/ex3_trajectories.py
-AGENTLAB_RESULTS=data/runs/prerecorded_mock AGENTLAB_HARNESS=baseline   python -m unittest discover -s trajectory_tests -v 2>&1 | tail -25
-AGENTLAB_RESULTS=data/runs/prerecorded_mock AGENTLAB_HARNESS=permissive python -m unittest discover -s trajectory_tests 2>&1 | grep FAIL | cut -c1-110
-AGENTLAB_RESULTS=data/runs/live python -m unittest discover -s trajectory_tests -v 2>&1 | tail -25
+HARNESSLAB_RESULTS=data/runs/prerecorded_mock HARNESSLAB_HARNESS=baseline   python -m unittest discover -s trajectory_tests -v 2>&1 | tail -25
+HARNESSLAB_RESULTS=data/runs/prerecorded_mock HARNESSLAB_HARNESS=permissive python -m unittest discover -s trajectory_tests 2>&1 | grep FAIL | cut -c1-110
+HARNESSLAB_RESULTS=data/runs/live python -m unittest discover -s trajectory_tests -v 2>&1 | tail -25
 ```
 
 `trajectory_tests/test_conduct.py` contains three groups: safety policies (a failure is an incident), process
@@ -268,7 +268,7 @@ up on the report card?) are the ones to bring to the discussion.
 
 Stretch. These trajectories were generated to train agents. Pick a feature that predicts failure and argue
 whether filtering training data on it would teach the model to avoid the failure or to avoid the symptom. Then
-look at `agentlab/real_traj.py::classify_command` and improve the action classifier; check whether the ranking
+look at `harnesslab/core/real_traj.py::classify_command` and improve the action classifier; check whether the ranking
 changes.
 
 ## 8. From benchmark to experiment (1:50 – 1:58)
