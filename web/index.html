@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentLab Console</title>
+<style>
+:root{
+  --ink:#1B1F2A;--paper:#FFFFFF;--muted:#6B7280;--rule:#E5E7EB;--card:#F4F5F7;--card2:#FAFAFB;--code:#23272F;--codeink:#E6E8EC;
+  --signal:#E4572E;--teal:#17A398;--amber:#F2A93B;--blue:#3B6FD9;--purple:#8B5CF6;--grey:#9CA3AF;
+  --pass:#17A398;--fail:#E4572E;--unres:#9CA3AF;
+  --sig-bg:#FFF3EE;--ok-bg:#DDF4F1;--ok-ink:#0E6E67;--bad-bg:#FBE1DA;--bad-ink:#A23516;--warn-bg:#FDEFD6;--warn-ink:#8A5A0B;--teal-bg:#EAF7F5;--blue-bg:#DCE7FB;--grey-bg:#E5E7EB;--grey-ink:#4B5563;--hover:#FFF7F4;
+  --header:#1B1F2A;--header-ink:#FFFFFF;--header-muted:#C7CAD1;--chip-on:#1B1F2A;--chip-on-ink:#FFFFFF;--strip-bg:#F9FAFB;--shadow:0 1px 2px rgba(16,20,30,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8EAEF;--paper:#14171E;--muted:#9AA0AA;--rule:#2C313C;--card:#1E222B;--card2:#191D25;--code:#0F1116;--codeink:#D6D9E0;
+    --blue:#7AA2FF;--grey:#6B7280;--unres:#6B7280;
+    --sig-bg:#3A231C;--ok-bg:#153631;--ok-ink:#7FE0D3;--bad-bg:#3E1F18;--bad-ink:#FFB09A;--warn-bg:#3B2E12;--warn-ink:#F7CF7F;--teal-bg:#153631;--blue-bg:#1E2A45;--grey-bg:#2C313C;--grey-ink:#C7CAD1;--hover:#2A2420;
+    --header:#0F1116;--header-ink:#F3F4F6;--header-muted:#9AA0AA;--chip-on:#E8EAEF;--chip-on-ink:#14171E;--strip-bg:#181B22;--shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8EAEF;--paper:#14171E;--muted:#9AA0AA;--rule:#2C313C;--card:#1E222B;--card2:#191D25;--code:#0F1116;--codeink:#D6D9E0;
+  --blue:#7AA2FF;--grey:#6B7280;--unres:#6B7280;
+  --sig-bg:#3A231C;--ok-bg:#153631;--ok-ink:#7FE0D3;--bad-bg:#3E1F18;--bad-ink:#FFB09A;--warn-bg:#3B2E12;--warn-ink:#F7CF7F;--teal-bg:#153631;--blue-bg:#1E2A45;--grey-bg:#2C313C;--grey-ink:#C7CAD1;--hover:#2A2420;
+  --header:#0F1116;--header-ink:#F3F4F6;--header-muted:#9AA0AA;--chip-on:#E8EAEF;--chip-on-ink:#14171E;--strip-bg:#181B22;--shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 "IBM Plex Sans","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif}
+code,pre,.mono{font-family:"IBM Plex Mono","SF Mono",Menlo,Consolas,monospace;font-size:12px}
+a{color:var(--blue)}
+button{font:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--header);color:var(--header-ink);padding:8px 18px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;overflow:hidden}
+header .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .brand{font-weight:700;font-size:16px;letter-spacing:.2px}
+header .brand span{color:var(--amber)}
+header .meta{color:var(--header-muted);font-size:12px}
+header .hbtn{background:transparent;border:1px solid #3A3F4B;color:var(--header-ink);border-radius:4px;padding:3px 9px;font-size:12px;cursor:pointer}
+header .hbtn:hover{border-color:var(--amber)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:12px;background:#2E3340;color:#fff}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--unres);display:inline-block}
+.live.on i{background:var(--teal);box-shadow:0 0 0 3px rgba(23,163,152,.25)}
+nav.strip{display:flex;gap:6px;padding:8px 18px;background:var(--strip-bg);border-bottom:1px solid var(--rule);align-items:center;flex-wrap:wrap}
+nav.strip .box{padding:4px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--muted);font-size:11.5px;letter-spacing:.4px;text-transform:uppercase}
+nav.strip .box.on{background:var(--signal);border-color:var(--signal);color:#fff;font-weight:600}
+nav.strip .arrow{color:var(--grey)}
+nav.tabs{display:flex;gap:0;padding:0 18px;border-bottom:1px solid var(--rule);flex-wrap:wrap;align-items:flex-end}
+nav.tabs .grp{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 4px 8px 8px;border-left:1px solid var(--rule);margin-left:4px;align-self:center}
+nav.tabs .grp:first-child{border-left:0;margin-left:0;padding-left:0}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 8px;font-weight:600;color:var(--muted);cursor:pointer;font-size:13px;white-space:nowrap}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--signal)}
+nav.tabs button kbd{font:10px monospace;color:var(--grey);margin-left:4px}
+.filters{display:flex;gap:14px;padding:8px 18px;border-bottom:1px solid var(--rule);flex-wrap:wrap;align-items:flex-start;background:var(--paper)}
+.fgroup{display:flex;flex-direction:column;gap:4px}
+.fgroup label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{padding:2px 9px;border:1px solid var(--rule);border-radius:14px;background:var(--paper);font-size:12px;cursor:pointer;user-select:none;color:var(--ink)}
+.chip.on{background:var(--chip-on);color:var(--chip-on-ink);border-color:var(--chip-on)}
+.chip.oracle.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip.pin{border-style:dashed}
+main{padding:16px 18px 30px;max-width:1560px}
+h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
+h3{font-size:15px;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+h3 .n{background:var(--signal);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+h4{margin:0 0 8px;font-size:13px}
+.claim{color:var(--muted);margin:0 0 14px;max-width:900px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.tile{background:var(--card);border-radius:6px;padding:10px 12px;box-shadow:var(--shadow)}
+.tile .v{font-size:24px;font-weight:700;color:var(--signal);line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+.tile .s{font-size:11px;color:var(--muted)}
+.tile.click{cursor:pointer}.tile.click:hover{outline:2px solid var(--signal)}
+table{border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--rule);padding:6px 8px;white-space:nowrap}
+th.sort{cursor:pointer}th.sort:hover{color:var(--ink)}
+td{padding:5px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--hover)}
+tr.selrow td{background:var(--sig-bg)}
+.tbl{overflow-x:auto}
+.grid{border-collapse:separate;border-spacing:3px}
+.grid td{padding:0;border:0}
+.cell{width:22px;height:22px;border-radius:3px;cursor:pointer;display:block;position:relative}
+.cell.PASS{background:var(--pass)}.cell.FAIL{background:var(--fail)}.cell.UNRESOLVED{background:var(--unres)}.cell.RUN{background:var(--amber);animation:pulse 1.2s infinite}
+.cell.sel{outline:3px solid var(--ink)}.cell.multi::after{content:"";position:absolute;inset:6px;border-radius:2px;background:var(--paper)}
+.cell.dim{opacity:.25}
+@keyframes pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion: reduce){.cell.RUN{animation:none}}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin:6px 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:4px}
+.row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.col{flex:1 1 420px;min-width:0}
+.col.narrow{flex:0 1 380px}
+.card{background:var(--card);border-radius:6px;padding:12px 14px;margin:8px 0;box-shadow:var(--shadow)}
+.card.plain{background:transparent;border:1px solid var(--rule);box-shadow:none}
+.hfield{display:grid;grid-template-columns:44px 120px 1fr;gap:6px;padding:5px 0;border-bottom:1px solid var(--paper);font-size:12.5px}
+.hfield .sym{font-weight:700;color:var(--signal)}
+.hfield .k{color:var(--muted)}
+.hfield.diff{background:var(--sig-bg);border-radius:4px}
+.hfield .v{white-space:pre-wrap;word-break:break-word}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;margin-right:3px;white-space:nowrap}
+.badge.ok{background:var(--ok-bg);color:var(--ok-ink)}.badge.bad{background:var(--bad-bg);color:var(--bad-ink)}.badge.na{background:var(--grey-bg);color:var(--grey-ink)}.badge.warn{background:var(--warn-bg);color:var(--warn-ink)}.badge.info{background:var(--blue-bg);color:var(--blue)}
+.out.PASS{color:var(--pass);font-weight:700}.out.FAIL{color:var(--fail);font-weight:700}.out.UNRESOLVED{color:var(--muted);font-weight:700}
+.timeline{border-left:2px solid var(--rule);margin-left:8px;padding-left:14px}
+.span{position:relative;margin:6px 0;padding:8px 10px;border-radius:6px;background:var(--card);font-size:12.5px}
+.span::before{content:"";position:absolute;left:-20px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--grey)}
+.span.chat{background:var(--paper);border:1px solid var(--rule)}.span.chat::before{background:var(--ink)}
+.span.tool::before{background:var(--blue)}
+.span.edit{background:var(--teal-bg)}.span.edit::before{background:var(--teal)}
+.span.boundary{background:var(--bad-bg);border-left:3px solid var(--fail)}.span.boundary::before{background:var(--fail)}
+.span.grade{background:var(--warn-bg)}.span.grade::before{background:var(--amber)}
+.span.hl{outline:3px solid var(--signal)}
+.span .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.span .seq{color:var(--muted);font-size:11px;min-width:34px}
+.span .kind{font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.5px;color:var(--muted)}
+.span pre{margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--code);color:var(--codeink);padding:6px 8px;border-radius:4px;max-height:220px;overflow:auto}
+.span .args{color:var(--ink)}
+.diff{font-family:"IBM Plex Mono",Menlo,monospace;font-size:11.5px;white-space:pre-wrap;word-break:break-word;background:var(--code);color:var(--codeink);padding:6px 8px;border-radius:4px;max-height:280px;overflow:auto;margin-top:6px}
+.diff .add{background:rgba(23,163,152,.25)}.diff .del{background:rgba(228,87,46,.28)}.diff .ctx{opacity:.7}
+.predicates td:first-child{font-weight:600}
+.small{font-size:11.5px;color:var(--muted)}
+input,select,textarea,button.btn{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink)}
+button.btn{cursor:pointer;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button.btn.sec{background:var(--paper);color:var(--ink)}
+button.btn.danger{background:var(--fail);border-color:var(--fail);color:#fff}
+button.btn.small{padding:2px 8px;font-size:12px}
+button.btn:disabled{opacity:.5;cursor:default}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;align-items:end}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+svg text{font-family:inherit}
+svg{max-width:100%;height:auto}
+@media (max-width:1500px){nav.tabs button kbd{display:none}}
+.seq-view{font-family:"IBM Plex Mono",Menlo,monospace;font-size:13px;letter-spacing:2px;white-space:nowrap}
+.seq-view b{padding:1px 3px;border-radius:3px;font-weight:600}
+.seq-view .L,.seq-view .R{background:var(--grey-bg);color:var(--grey-ink)}.seq-view .F{background:var(--grey-bg);color:var(--purple)}.seq-view .W,.seq-view .E{background:var(--ok-bg);color:var(--ok-ink)}.seq-view .T{background:var(--blue-bg);color:var(--blue)}.seq-view .B{background:var(--warn-bg);color:var(--warn-ink)}.seq-view .S{background:var(--ink);color:var(--paper)}
+.seq-view b.cur{outline:2px solid var(--signal)}
+.tabsmall{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;align-items:center}
+.tabsmall button{font-size:12px;padding:4px 10px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:4px;cursor:pointer}
+.tabsmall button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+textarea.md{width:100%;min-height:420px;font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px}
+.callout{border-left:4px solid var(--signal);background:var(--sig-bg);padding:8px 12px;margin:10px 0;font-size:13px}
+.callout.teal{border-color:var(--teal);background:var(--teal-bg)}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px;font-size:12.5px}
+.kv div:nth-child(odd){color:var(--muted)}
+.cellpick{display:inline-block;padding:3px 8px;border:1px solid var(--rule);border-radius:4px;margin:2px;cursor:pointer;font-size:12px;background:var(--paper);color:var(--ink)}
+.cellpick.on{background:var(--ink);color:var(--paper)}
+.finding{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-bottom:1px solid var(--rule)}
+.finding:last-child{border-bottom:0}
+.finding .ic{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.finding .t{font-weight:600}
+.finding .d{color:var(--muted);font-size:12.5px;margin-top:2px}
+.finding button{white-space:nowrap}
+.progress{height:8px;background:var(--grey-bg);border-radius:4px;overflow:hidden;min-width:120px}
+.progress i{display:block;height:100%;background:var(--teal)}
+.progress.run i{background:var(--amber)}
+.barcode{display:inline-flex;gap:1px;vertical-align:middle}
+.barcode i{width:4px;height:14px;border-radius:1px;display:block}
+.drawer{position:fixed;top:0;right:0;width:min(560px,100%);height:100%;background:var(--paper);border-left:1px solid var(--rule);box-shadow:-8px 0 24px rgba(0,0,0,.15);z-index:20;overflow:auto;padding:18px 22px}
+.drawer h2{margin-top:0}
+.drawer .close{position:absolute;top:10px;right:14px}
+.drawer dl{margin:0}.drawer dt{font-weight:700;margin-top:12px}.drawer dd{margin:2px 0 0;color:var(--muted);font-size:13px}
+.drawer dd .mono{color:var(--ink)}
+.kbd{display:inline-block;border:1px solid var(--rule);border-radius:3px;padding:0 5px;font:11px monospace;background:var(--card)}
+.heat{border-collapse:collapse}.heat td,.heat th{padding:0;border:1px solid var(--paper);text-align:center;font-size:10.5px;width:34px;height:26px}
+.heat th{background:transparent;border:0;color:var(--muted);font-size:10.5px}
+.heat td.lbl{text-align:right;padding-right:6px;font-weight:600;color:var(--muted);width:auto}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);padding:4px 8px;border-radius:4px;font-size:11.5px;z-index:30;display:none;max-width:320px}
+.check{width:14px;height:14px;vertical-align:-2px;margin:0}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.stack{display:flex;flex-direction:column;gap:6px}
+.sparkline{vertical-align:middle}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+footer{padding:20px 18px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--rule);margin-top:30px}
+@media (max-width:900px){header .meta.wide{display:none} main{padding:12px}}
+:focus-visible{outline:2px solid var(--signal);outline-offset:1px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">AgentLab <span>Console</span></div>
+  <div class="live" id="live"><i></i><span>loading</span></div>
+  <div class="meta" id="meta"></div>
+  <div style="flex:1"></div>
+  <button class="hbtn" id="btn_help" title="help and formulas (?)">? help</button>
+  <button class="hbtn" id="btn_theme" title="theme (t)">◐ theme</button>
+</header>
+<nav class="strip" id="strip"></nav>
+<nav class="tabs" id="tabs"></nav>
+<div class="filters" id="filters"></div>
+<main id="main"></main>
+<div class="tip" id="tip"></div>
+<footer>AgentLab Console · the lab platform for "Measuring a coding agent that will not hold still" · standard-library server, no dependencies, nothing leaves your machine. Ledger fields follow the OpenTelemetry GenAI semantic conventions (gen_ai.*).</footer>
+<script>
+/*__BUNDLE__*/
+</script>
+<script>
+"use strict";
+// ---- core.js
+// ============================================================ state
+let B = null, MODE = "static";
+const S = { tab: "overview", results: new Set(), models: new Set(), harnesses: new Set(), tasks: new Set(), oracle: "hidden",
+  sel: null, cmp: null, multi: new Set(), hl: null, hA: null, hB: null, expA: null, expB: null, expFA: "model", expFB: "harness_id",
+  sortAttr: "ochiai", attrOpen: null, thr: { steps: 8, repeated: 0, lines: 20, files: 1, first_edit: 4 }, detail: {},
+  trajTab: "list", trajOutcome: "", trajTask: "", trajSort: "run", listPage: 0, patK: 3, patCell: "", patTask: "",
+  q: { name: "", re: "", steps_min: "", steps_max: "", cost_min: "", exit: "", boundary: "", tests_mod: "" }, qOpen: null, qSaved: [],
+  jobsOpen: true, help: false, theme: "auto", seqTab: "sequences", preset: "" };
+const TABS = [
+  ["overview", "Overview", "Task", "1", "Runs"], ["board", "Board", "Task", "2", ""],
+  ["harness", "Harness", "Harness", "3", "Harness"],
+  ["traj", "Trajectories", "Trajectory", "4", "Trajectories"], ["patterns", "Patterns", "Trajectory", "5", ""], ["queries", "Queries", "Trajectory", "6", ""],
+  ["dist", "Distribution", "Distribution", "7", "Statistics"], ["attr", "Attribution", "Trajectory", "8", ""], ["exp", "Experiment", "Inference", "9", ""],
+  ["tele", "Telemetry", "Telemetry", "0", "Ledger"], ["integ", "Integrity", "Oracle", "-", ""], ["report", "Report card", "Inference", "=", ""]];
+const STRIP = ["Task", "Oracle", "Harness", "Trajectory", "Distribution", "Telemetry", "Inference"];
+const ORACLE_KEY = { visible: "visible_pass", hidden: "hidden_pass", strong: "strong_pass" };
+const TOOL_CODE = { list_files: "L", read_file: "R", write_file: "W", edit_file: "E", run_tests: "T", bash: "B", submit: "S" };
+const KIND_CODE = { view: "R", search: "F", edit: "E", run: "T", submit: "S", other: "B" };
+const CODE_NAME = { L: "list_files", R: "read / view", F: "search", W: "write_file", E: "edit", T: "run tests", B: "bash / other", S: "submit" };
+const SERIES = ["#E4572E", "#17A398", "#3B6FD9", "#F2A93B", "#8B5CF6", "#6B7280", "#D946EF", "#0EA5E9"];
+
+// ============================================================ helpers
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const mean = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : NaN;
+const sum = (xs) => xs.reduce((a, b) => a + b, 0);
+const median = (xs) => { if (!xs.length) return NaN; const s = xs.slice().sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const quantile = (xs, q) => { if (!xs.length) return NaN; const s = xs.slice().sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.floor(q * s.length))]; };
+const fmt = (x, d = 2) => (x == null || Number.isNaN(x)) ? "n/a" : (!Number.isFinite(x) ? "inf" : Number(x).toFixed(d));
+const pct = (x, d = 0) => (x == null || Number.isNaN(x)) ? "n/a" : (100 * x).toFixed(d) + "%";
+const usd = (x) => (x == null || Number.isNaN(x)) ? "n/a" : (!Number.isFinite(x) ? "inf" : (x === 0 ? "$0" : "$" + x.toFixed(x < 0.1 ? 4 : 2)));
+const ints = (x) => (x == null || Number.isNaN(x)) ? "n/a" : (!Number.isFinite(x) ? "inf" : Math.round(x).toLocaleString());
+const secs = (s) => s == null ? "" : (s < 60 ? s + "s" : Math.floor(s / 60) + "m" + String(s % 60).padStart(2, "0") + "s");
+const uniq = (xs) => Array.from(new Set(xs));
+const by = (xs, f) => { const m = new Map(); xs.forEach(x => { const k = f(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); }); return m; };
+const oracleKey = () => ORACLE_KEY[S.oracle];
+const hasOracle = (r, key) => r[key || oracleKey()] != null;
+function outcome(r, key) { key = key || oracleKey(); if (r[key] == null) return r.exit_reason === "submitted" ? "UNGRADED" : "UNRESOLVED"; if (r[key]) return "PASS"; return r.exit_reason === "submitted" ? "FAIL" : "UNRESOLVED"; }
+function filtered() {
+  return B.runs.filter(r => (!S.results.size || S.results.has(r.results)) && (!S.models.size || S.models.has(r.model))
+    && (!S.harnesses.size || S.harnesses.has(r.harness_id)) && (!S.tasks.size || S.tasks.has(r.task_id)));
+}
+const spansOf = (r) => (S.detail[r.key] && S.detail[r.key].spans) || B.trajectories[r.key] || [];
+const featOf = (r) => B.features[r.key] || {};
+const runByKey = (k) => B.runs.find(r => r.key === k);
+const tokOf = (r) => (r.input_tokens || 0) + (r.output_tokens || 0);
+const cellOf = (r) => `${r.model}|${r.harness_id}`;
+const cellLabel = (r) => `${r.model} · ${r.harness_id}`;
+const runShort = (r) => /^\d{8}-\d{6}-[0-9a-f]{6}$/.test(r.run_id) ? r.run_id.slice(-6) : (r.run_id.length > 18 ? "…" + r.run_id.slice(-14) : r.run_id);
+function groupsOf(R) { return by(R, r => `${r.results}|${r.model}|${r.harness_id}`); }
+
+// ============================================================ statistics (all in the browser)
+function comb(n, k) { if (k < 0 || k > n) return 0; k = Math.min(k, n - k); let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return r; }
+function passAtK(c, n, k) { if (n - c < k) return 1; return 1 - comb(n - c, k) / comb(n, k); }
+function passPowK(c, n, k) { if (c < k) return 0; return comb(c, k) / comb(n, k); }
+function wilson(c, n, z = 1.96) { if (!n) return [NaN, NaN]; const p = c / n, d = 1 + z * z / n, ctr = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d; return [Math.max(0, ctr - h), Math.min(1, ctr + h)]; }
+function wald(c, n, z = 1.96) { if (!n) return [NaN, NaN]; const p = c / n, h = z * Math.sqrt(p * (1 - p) / n); return [p - h, p + h]; }
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function bootstrapCI(vals, Bn = 2000, seed = 7) { const n = vals.length; if (!n) return [NaN, NaN]; const r = rng(seed), boots = []; for (let b = 0; b < Bn; b++) { let s = 0; for (let i = 0; i < n; i++) s += vals[Math.floor(r() * n)]; boots.push(s / n); } boots.sort((a, b) => a - b); return [boots[Math.floor(0.025 * Bn)], boots[Math.floor(0.975 * Bn) - 1], boots]; }
+function graded(runs, key) { key = key || oracleKey(); return runs.filter(r => r[key] != null); }
+function taskTable(runs, key) { key = key || oracleKey(); const m = by(graded(runs, key), r => r.task_id), out = {}; Array.from(m.keys()).sort().forEach(t => { const o = m.get(t).map(r => !!r[key]); const n = o.length, c = o.filter(x => x).length; out[t] = { n, c, p: c / n }; }); return out; }
+function aggregate(runs, key, ks = [1, 2, 3, 5]) { const tt = taskTable(runs, key), ts = Object.keys(tt); if (!ts.length) return null; const res = { pass1: mean(ts.map(t => tt[t].p)), n_tasks: ts.length, runs: runs.length, tt }; ks.forEach(k => { const a = ts.filter(t => tt[t].n >= k); if (a.length) { res["pass@" + k] = mean(a.map(t => passAtK(tt[t].c, tt[t].n, k))); res["pass^" + k] = mean(a.map(t => passPowK(tt[t].c, tt[t].n, k))); } }); return res; }
+function passRate(runs, key) { key = key || oracleKey(); const g = graded(runs, key); return g.length ? g.filter(r => r[key]).length / g.length : NaN; }
+function pairedBootstrap(runsA, runsB, key, Bn = 4000) { const ta = taskTable(runsA, key), tb = taskTable(runsB, key); const tasks = Object.keys(ta).filter(t => tb[t]); const diffs = tasks.map(t => tb[t].p - ta[t].p); if (!diffs.length) return { n: 0 }; const [lo, hi] = bootstrapCI(diffs, Bn, 11); return { n: tasks.length, mean: mean(diffs), lo, hi, per_task: Object.fromEntries(tasks.map((t, i) => [t, diffs[i]])) }; }
+function flipRate(runs, key) { const tt = taskTable(runs, key); const ts = Object.keys(tt); return ts.length ? ts.filter(t => tt[t].c > 0 && tt[t].c < tt[t].n).length / ts.length : NaN; }
+function tokensPerSolve(runs, key) { key = key || oracleKey(); const tot = sum(runs.map(tokOf)), s = runs.filter(r => r[key]).length; return s ? tot / s : Infinity; }
+function costOfPass(runs, key) { key = key || oracleKey(); const g = graded(runs, key); if (!g.length) return NaN; const mc = mean(g.map(r => r.cost_usd || 0)), p = g.filter(r => r[key]).length / g.length; return p ? mc / p : Infinity; }
+function verifiedRate(runs) { return mean(runs.map(r => featOf(r).ran_after_last_edit ? 1 : 0)); }
+function boundaryAny(runs) { return mean(runs.map(r => r.boundary_events > 0 ? 1 : 0)); }
+function exitMix(runs) { const m = by(runs, r => r.exit_reason); return Array.from(m.entries()).map(([k, v]) => [k, v.length / runs.length]).sort((a, b) => b[1] - a[1]); }
+function latencyOf(r) { return sum(spansOf(r).filter(s => s.span === "chat").map(s => s.ms || 0)); }
+function kappa(a, b) { const n = a.length; if (!n) return NaN; const po = a.filter((x, i) => x === b[i]).length / n; const labels = uniq(a.concat(b)); const pe = sum(labels.map(l => (a.filter(x => x === l).length / n) * (b.filter(x => x === l).length / n))); return pe === 1 ? 1 : (po - pe) / (1 - pe); }
+function powerN(pA, pB, power = 0.8) { const za = 1.959964, zb = power === 0.8 ? 0.841621 : 1.281552; const d = pA - pB; if (!d) return Infinity; return Math.ceil(Math.pow(za + zb, 2) * (pA * (1 - pA) + pB * (1 - pB)) / (d * d)); }
+function riskRatio(a, b, c, d) { // a: exposed fail, b: exposed pass, c: unexposed fail, d: unexposed pass
+  const p1 = a / (a + b || 1), p0 = c / (c + d || 1); if (!p0 || !p1) return { rr: p0 ? p1 / p0 : NaN, lo: NaN, hi: NaN }; const rr = p1 / p0, se = Math.sqrt(1 / a - 1 / (a + b) + 1 / c - 1 / (c + d)); return { rr, lo: Math.exp(Math.log(rr) - 1.96 * se), hi: Math.exp(Math.log(rr) + 1.96 * se) }; }
+function levenshtein(a, b) { const m = a.length, n = b.length; if (!m) return n; if (!n) return m; let prev = Array.from({ length: n + 1 }, (_, j) => j), cur = new Array(n + 1); for (let i = 1; i <= m; i++) { cur[0] = i; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); [prev, cur] = [cur, prev]; } return prev[n]; }
+function factorial(runs, aKey, bKey, blockKey, key) {
+  key = key || oracleKey(); runs = graded(runs, key);
+  const ys = runs.map(r => r[key] ? 1 : 0), A = runs.map(r => r[aKey]), Bv = runs.map(r => r[bKey]), K = runs.map(r => r[blockKey]);
+  const n = ys.length, mu = mean(ys);
+  const meanBy = (keys) => { const acc = new Map(); keys.forEach((k, i) => { if (!acc.has(k)) acc.set(k, []); acc.get(k).push(ys[i]); }); const m = new Map(), cnt = new Map(); acc.forEach((v, k) => { m.set(k, mean(v)); cnt.set(k, v.length); }); return [m, cnt]; };
+  const [ma, na] = meanBy(A), [mb, nb] = meanBy(Bv), [mk, nk] = meanBy(K), [mab, nab] = meanBy(A.map((a, i) => a + "|" + Bv[i])), [mabk] = meanBy(A.map((a, i) => a + "|" + Bv[i] + "|" + K[i]));
+  const sq = (x) => x * x;
+  const ssT = sum(ys.map(y => sq(y - mu)));
+  const ssA = sum(Array.from(ma.entries()).map(([a, m]) => na.get(a) * sq(m - mu)));
+  const ssB = sum(Array.from(mb.entries()).map(([b, m]) => nb.get(b) * sq(m - mu)));
+  const ssAB = sum(Array.from(mab.entries()).map(([ab, m]) => { const [a, b] = ab.split("|"); return nab.get(ab) * sq(m - ma.get(a) - mb.get(b) + mu); }));
+  const ssK = sum(Array.from(mk.entries()).map(([k, m]) => nk.get(k) * sq(m - mu)));
+  const ssW = sum(ys.map((y, i) => sq(y - mabk.get(A[i] + "|" + Bv[i] + "|" + K[i]))));
+  const ssCxT = Math.max(0, ssT - ssA - ssB - ssAB - ssK - ssW);
+  const dfA = ma.size - 1, dfB = mb.size - 1, dfAB = dfA * dfB, dfK = mk.size - 1, dfW = n - mabk.size, dfC = Math.max((mabk.size - 1) - dfA - dfB - dfAB - dfK, 1);
+  const msW = dfW ? ssW / dfW : NaN;
+  const rows = [[aKey + " (A)", ssA, dfA], [bKey + " (B)", ssB, dfB], ["A × B", ssAB, dfAB], ["task (block)", ssK, dfK], ["cell × task", ssCxT, dfC], ["residual (repeats)", ssW, dfW]].map(([term, ss, df]) => { const ms = df ? ss / df : NaN; return { term, ss, df, ms, F: term.startsWith("residual") ? NaN : ms / msW, share: ssT ? ss / ssT : NaN }; });
+  return { n, mu, ma, mb, mab, rows, ssT };
+}
+// Monte-Carlo: with k repeats per task, how often does the arm with the lower true mean come out ahead?
+function wrongWinner(pA, pB, k, sims = 2000, seed = 3) { const r = rng(seed); let wrong = 0, ties = 0; const better = mean(pA) >= mean(pB) ? "A" : "B"; for (let s = 0; s < sims; s++) { let a = 0, b = 0; for (let t = 0; t < pA.length; t++) for (let j = 0; j < k; j++) { if (r() < pA[t]) a++; if (r() < pB[t]) b++; } if (a === b) ties++; else if ((a > b ? "A" : "B") !== better) wrong++; } return { wrong: wrong / sims, ties: ties / sims }; }
+
+// ============================================================ trajectory predicates (evaluated on the ledger spans)
+const toolSpans = (spans) => spans.filter(s => s.span === "execute_tool");
+const isEditSpan = (s) => s.tool === "write_file" || s.tool === "edit_file" || s.kind === "edit";
+const isTestSpan = (s) => s.tool === "run_tests" || s.kind === "run" || (s.tool === "bash" && /unittest|pytest/.test((s.args && s.args.command) || ""));
+const isReadSpan = (s) => s.tool === "read_file" || s.kind === "view";
+const codeOf = (s) => s.kind ? (KIND_CODE[s.kind] || "?") : (TOOL_CODE[s.tool] || "?");
+function predicates(spans) {
+  const tools = toolSpans(spans);
+  const editIdx = tools.map((s, i) => isEditSpan(s) ? i : -1).filter(i => i >= 0);
+  const lastEdit = editIdx.length ? editIdx[editIdx.length - 1] : -1;
+  const verifyAfter = lastEdit >= 0 ? tools.slice(lastEdit + 1).some(isTestSpan) : null;
+  const untested = editIdx.filter(i => !tools.slice(i + 1).some(isTestSpan));
+  const testEdit = tools.find(s => isEditSpan(s) && /(^|\/)tests?\//.test((s.args && (s.args.path || s.args.command)) || ""));
+  const boundary = spans.filter(s => s.span === "boundary_event");
+  const blocked = boundary.filter(b => b.status === "blocked"), allowed = boundary.filter(b => b.status === "allowed");
+  const submitted = tools.some(s => s.tool === "submit" || s.kind === "submit");
+  const seen = new Set(); let unread = null;
+  for (const s of tools) { if (isReadSpan(s)) seen.add(s.args.path || "?"); else if (isEditSpan(s) && s.args.path && !seen.has(s.args.path)) { unread = s; break; } }
+  let sig = new Set(), rep = null, repCount = 0;
+  for (const s of tools) { if (isEditSpan(s)) sig = new Set(); const k = s.tool + JSON.stringify(s.args || {}); if (sig.has(k)) { repCount++; rep = rep || s; } sig.add(k); }
+  const noTests = !tools.some(isTestSpan);
+  const imported = tools.some(s => s.kind);
+  return [
+    { id: "P_verify", label: "Verified after last edit", formula: "∃ t > t_last-edit : a_t = run_tests", ok: verifyAfter, at: lastEdit >= 0 ? tools[lastEdit].seq : null, note: lastEdit < 0 ? "no edit in this run" : (verifyAfter ? "" : "the last edit was never tested") },
+    { id: "G(edit ⇒ F test)", label: "Every edit eventually tested", formula: "G(edit ⇒ F test)", ok: editIdx.length ? untested.length === 0 : null, at: untested.length ? tools[untested[0]].seq : null, note: untested.length ? untested.length + " edit(s) never followed by a test" : "" },
+    { id: "P_scope", label: "Never edited a test file", formula: "∀ t : path(a_t) ∉ tests/", ok: !testEdit, at: testEdit ? testEdit.seq : null, note: testEdit ? "edited " + (testEdit.args.path || testEdit.args.command) : "" },
+    { id: "G ¬blocked", label: "No blocked action", formula: "G ¬(policy = blocked)", ok: imported ? null : blocked.length === 0, at: blocked.length ? blocked[0].seq : null, note: imported ? "no policy on imported runs" : (blocked.length ? blocked.length + " blocked: " + uniq(blocked.map(b => b.kind)).join(", ") : "") },
+    { id: "G ¬destructive", label: "No boundary event executed", formula: "G ¬(policy = allowed-through)", ok: imported ? null : allowed.length === 0, at: allowed.length ? allowed[0].seq : null, note: imported ? "" : (allowed.length ? allowed.length + " executed under a permissive policy: " + uniq(allowed.map(b => b.kind)).join(", ") : "") },
+    { id: "F submit", label: "Eventually submitted", formula: "F submit", ok: submitted, at: null, note: submitted ? "" : "run ended by the harness, not by the agent" },
+    { id: "read ≺ write", label: "Read before write", formula: "∀ write(f) : ∃ read(f) before it", ok: imported ? null : !unread, at: unread ? unread.seq : null, note: imported ? "paths not recoverable from the command language" : (unread ? "wrote " + unread.args.path + " without reading it" : "") },
+    { id: "¬loop", label: "No identical call repeated on an unchanged state", formula: "¬∃ i<j : a_i = a_j ∧ no edit in (i, j)", ok: repCount === 0, at: rep ? rep.seq : null, note: repCount ? repCount + " exact repeat(s) with no edit in between" : "" },
+    { id: "ran_tests", label: "Ran the tests at all", formula: "∃ t : a_t = run_tests", ok: !noTests, at: null, note: noTests ? "no test execution in the whole run" : "" },
+  ];
+}
+function seqOf(r) { return (featOf(r).sequence) || toolSpans(spansOf(r)).map(codeOf).join(""); }
+
+// ============================================================ binary features for attribution
+function featureDefs() {
+  const t = S.thr;
+  return [
+    ["never_verified_after_edit", "never verified after last edit", f => f.n_edit > 0 && !f.ran_after_last_edit],
+    ["no_test_run", "no test run at all", f => f.n_test === 0 && f.n_bash === 0],
+    ["did_not_submit", "did not submit", f => !f.submitted],
+    ["no_read_before_write", "wrote a file it never read", f => !f.read_before_write],
+    ["edited_tests", "edited a test file", f => !!f.tests_modified],
+    ["boundary_event", "≥1 boundary event", f => f.boundary_events > 0],
+    [`repeated>${t.repeated}`, `identical calls repeated on an unchanged state > ${t.repeated}`, f => (f.repeated_no_edit != null ? f.repeated_no_edit : f.repeated) > t.repeated],
+    [`steps>${t.steps}`, `steps > ${t.steps}`, f => f.steps > t.steps],
+    [`lines_edited>${t.lines}`, `patch > ${t.lines} lines`, f => f.lines_edited > t.lines],
+    [`files>${t.files}`, `files edited > ${t.files}`, f => f.files_edited > t.files],
+    [`late_first_edit>${t.first_edit}`, `first edit after step ${t.first_edit}`, f => f.first_edit_step > t.first_edit],
+    ["no_edit_at_all", "no edit at all", f => f.n_edit === 0],
+    ["exit_budget", "ended by step, token or context budget", f => ["max_steps", "budget_exceeded", "exit_context", "exit_cost"].includes(f.exit_reason)],
+  ];
+}
+function attribution(runs, key) {
+  key = key || oracleKey(); runs = graded(runs, key);
+  const defs = featureDefs(); const fails = runs.map(r => !r[key]); const F = fails.filter(x => x).length, P = runs.length - F;
+  return defs.map(([id, label, fn]) => { let ef = 0, ep = 0; const carriers = []; runs.forEach((r, i) => { if (fn(featOf(r))) { carriers.push(r); if (fails[i]) ef++; else ep++; } });
+    const ochiai = (F && ef + ep) ? ef / Math.sqrt(F * (ef + ep)) : 0; const rf = F ? ef / F : 0, rp = P ? ep / P : 0; const tar = (rf + rp) ? rf / (rf + rp) : 0;
+    return { id, label, ef, ep, rf: F ? ef / F : NaN, rp: P ? ep / P : NaN, ochiai, tarantula: tar, carriers }; });
+}
+function predicateStats(runs, matchFn, key) {
+  key = key || oracleKey(); runs = graded(runs, key);
+  let a = 0, b = 0, c = 0, d = 0; const matches = [];
+  runs.forEach(r => { const m = matchFn(r); const fail = !r[key]; if (m) { matches.push(r); if (fail) a++; else b++; } else { if (fail) c++; else d++; } });
+  const F = a + c; const ochiai = (F && a + b) ? a / Math.sqrt(F * (a + b)) : 0;
+  return { matches, a, b, c, d, n: runs.length, passIn: (a + b) ? b / (a + b) : NaN, passOut: (c + d) ? d / (c + d) : NaN, ochiai, rr: riskRatio(a, b, c, d) };
+}
+
+// ============================================================ sequences: clustering, transitions, divergence
+function clusterSequences(seqs, k) { // average-linkage agglomerative on edit distance; returns array of index arrays
+  const n = seqs.length; if (!n) return []; const D = Array.from({ length: n }, () => new Float32Array(n));
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const d = levenshtein(seqs[i], seqs[j]); D[i][j] = d; D[j][i] = d; }
+  let clusters = Array.from({ length: n }, (_, i) => [i]);
+  const dist = (A, Bc) => { let s = 0; for (const i of A) for (const j of Bc) s += D[i][j]; return s / (A.length * Bc.length); };
+  while (clusters.length > k) { let best = [0, 1, Infinity]; for (let i = 0; i < clusters.length; i++) for (let j = i + 1; j < clusters.length; j++) { const d = dist(clusters[i], clusters[j]); if (d < best[2]) best = [i, j, d]; } const [i, j] = best; clusters[i] = clusters[i].concat(clusters[j]); clusters.splice(j, 1); }
+  return clusters.map(c => { let med = c[0], bestS = Infinity; for (const i of c) { const s = sum(c.map(j => D[i][j])); if (s < bestS) { bestS = s; med = i; } } return { members: c, medoid: med, D }; });
+}
+function transitions(seqs) { const M = {}; const alpha = "LRFWETBS"; alpha.split("").forEach(a => { M[a] = {}; alpha.split("").forEach(b => M[a][b] = 0); }); seqs.forEach(s => { for (let i = 0; i + 1 < s.length; i++) if (M[s[i]] && M[s[i]][s[i + 1]] != null) M[s[i]][s[i + 1]]++; }); return M; }
+function commonPrefix(seqs) { if (!seqs.length) return ""; let p = seqs[0]; for (const s of seqs) { let i = 0; while (i < p.length && i < s.length && p[i] === s[i]) i++; p = p.slice(0, i); if (!p) break; } return p; }
+
+// ============================================================ line diff (LCS) for edits
+function lineDiff(a, b) { const A = a.split("\n"), Bl = b.split("\n"); const n = A.length, m = Bl.length; if (n * m > 4e6) return null; const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1)); for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === Bl[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]); const out = []; let i = 0, j = 0; while (i < n && j < m) { if (A[i] === Bl[j]) { out.push(["ctx", A[i]]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) { out.push(["del", A[i]]); i++; } else { out.push(["add", Bl[j]]); j++; } } while (i < n) out.push(["del", A[i++]]); while (j < m) out.push(["add", Bl[j++]]); return out; }
+function diffHtml(pairs, ctx = 2) { if (!pairs) return `<div class="small">file too large to diff</div>`; const keep = new Set(); pairs.forEach((p, i) => { if (p[0] !== "ctx") for (let k = -ctx; k <= ctx; k++) keep.add(i + k); }); let h = "", gap = false; pairs.forEach((p, i) => { if (!keep.has(i)) { gap = true; return; } if (gap) { h += `<span class="ctx">   …</span>\n`; gap = false; } h += `<span class="${p[0]}">${p[0] === "add" ? "+" : p[0] === "del" ? "-" : " "} ${esc(p[1])}</span>\n`; }); return `<div class="diff">${h || '<span class="ctx">(identical)</span>'}</div>`; }
+
+// ============================================================ url state + storage
+const SETS = ["results", "models", "harnesses", "tasks"];
+function stateToHash() { const p = new URLSearchParams(); p.set("tab", S.tab); SETS.forEach(k => { if (S[k].size) p.set(k, Array.from(S[k]).join(",")); }); if (S.oracle !== "hidden") p.set("oracle", S.oracle); if (S.sel) p.set("run", S.sel); if (S.cmp) p.set("cmp", S.cmp); if (S.trajTab !== "list") p.set("tt", S.trajTab); if (S.expA) p.set("A", S.expA); if (S.expB) p.set("B", S.expB); if (S.hA) p.set("hA", S.hA); if (S.hB) p.set("hB", S.hB); return "#" + p.toString(); }
+function hashToState() { const h = location.hash.slice(1); if (!h) return; const p = new URLSearchParams(h); if (p.get("tab") && TABS.some(t => t[0] === p.get("tab"))) S.tab = p.get("tab"); SETS.forEach(k => { if (p.get(k)) S[k] = new Set(p.get(k).split(",")); }); if (p.get("oracle") && ORACLE_KEY[p.get("oracle")]) S.oracle = p.get("oracle"); if (p.get("run")) S.sel = p.get("run"); if (p.get("cmp")) S.cmp = p.get("cmp"); if (p.get("tt")) S.trajTab = p.get("tt"); if (p.get("A")) S.expA = p.get("A"); if (p.get("B")) S.expB = p.get("B"); if (p.get("hA")) S.hA = p.get("hA"); if (p.get("hB")) S.hB = p.get("hB"); }
+function syncHash() { try { history.replaceState(null, "", stateToHash()); } catch (e) { } }
+function store(k, v) { try { localStorage.setItem("agentlab." + k, JSON.stringify(v)); } catch (e) { } }
+function load(k, d) { try { const v = localStorage.getItem("agentlab." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+
+// ---- charts.js
+// ============================================================ SVG charts (theme-aware: colours come from CSS variables)
+const TXT = 'style="fill:var(--muted)"', TXT2 = 'style="fill:var(--ink)"', GRID = 'style="stroke:var(--rule)"';
+function svgBar(items, o = {}) {
+  const w = o.w || 420, bh = o.bh || 18, gap = 6, lw = o.lw || 150, h = items.length * (bh + gap) + 8; const max = o.max || Math.max(1e-9, ...items.map(i => i.value));
+  let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  items.forEach((it, i) => { const y = i * (bh + gap) + 4, bw = Math.max(0, (w - lw - 70) * (Math.min(it.value, max) / max)); s += `<text x="${lw - 6}" y="${y + bh - 5}" text-anchor="end" font-size="11" ${TXT2}>${esc(it.label)}</text><rect x="${lw}" y="${y}" width="${bw}" height="${bh}" fill="${it.color || "#17A398"}" rx="2"${it.act ? ` data-act="${it.act}" data-key="${esc(it.key || "")}" style="cursor:pointer"` : ""}><title>${esc(it.title || it.label)}</title></rect><text x="${lw + bw + 5}" y="${y + bh - 5}" font-size="11" ${TXT2}>${esc(it.text != null ? it.text : fmt(it.value))}</text>`; });
+  return s + "</svg>";
+}
+function svgLines(series, o = {}) {
+  const w = o.w || 460, h = o.h || 240, ml = o.ml || 44, mr = 16, mt = 14, mb = o.xlabel ? 36 : 24; const xs = uniq(series.flatMap(s => s.points.map(p => p[0]))).sort((a, b) => a - b);
+  if (!xs.length) return `<div class="empty">no data</div>`;
+  const xmin = o.xmin != null ? o.xmin : Math.min(...xs), xmax = o.xmax != null ? o.xmax : Math.max(...xs), ymin = o.ymin != null ? o.ymin : 0, ymax = o.ymax != null ? o.ymax : Math.max(1e-9, ...series.flatMap(s => s.points.map(p => p[1])));
+  const X = x => ml + (xmax > xmin ? (x - xmin) / (xmax - xmin) : 0.5) * (w - ml - mr), Y = y => mt + (1 - (y - ymin) / (ymax - ymin || 1)) * (h - mt - mb);
+  let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  for (let i = 0; i <= 4; i++) { const yv = ymin + (ymax - ymin) * i / 4; s += `<line x1="${ml}" x2="${w - mr}" y1="${Y(yv)}" y2="${Y(yv)}" ${GRID}/><text x="${ml - 6}" y="${Y(yv) + 4}" text-anchor="end" font-size="10" ${TXT}>${o.yfmt ? o.yfmt(yv) : fmt(yv, 2)}</text>`; }
+  (o.xticks || xs).forEach(x => { s += `<text x="${X(x)}" y="${h - mb + 14}" text-anchor="middle" font-size="10" ${TXT}>${esc(o.xfmt ? o.xfmt(x) : x)}</text>`; });
+  if (o.xlabel) s += `<text x="${(ml + w - mr) / 2}" y="${h - 4}" text-anchor="middle" font-size="11" ${TXT2}>${esc(o.xlabel)}</text>`;
+  if (o.hline != null) s += `<line x1="${ml}" x2="${w - mr}" y1="${Y(o.hline)}" y2="${Y(o.hline)}" stroke="var(--signal)" stroke-dasharray="4 3"/>`;
+  series.forEach(se => { if (se.band) se.band.forEach(b => { s += `<line x1="${X(b[0])}" x2="${X(b[0])}" y1="${Y(b[1])}" y2="${Y(b[2])}" stroke="${se.color}" stroke-width="1.5" opacity=".55"/>`; }); const pts = se.points.map(p => `${X(p[0])},${Y(p[1])}`).join(" "); s += `<polyline points="${pts}" fill="none" stroke="${se.color}" stroke-width="2" stroke-dasharray="${se.dash || ""}"/>`; se.points.forEach(p => { s += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3" fill="${se.color}"><title>${esc(se.name)} · ${o.xfmt ? o.xfmt(p[0]) : p[0]}: ${fmt(p[1], 3)}${p[2] ? " · " + esc(p[2]) : ""}</title></circle>`; }); });
+  s += "</svg>";
+  return s + `<div class="legend">${series.map(se => `<span><i style="background:${se.color}"></i>${esc(se.name)}</span>`).join("")}</div>`;
+}
+function svgHist(values, o = {}) {
+  const w = o.w || 300, h = o.h || 120, bins = o.bins || 10; if (!values.length) return `<div class="small">no runs</div>`; const lo = o.lo != null ? o.lo : Math.min(...values), hi = o.hi != null ? o.hi : Math.max(...values); const step = (hi - lo) / bins || 1; const counts = new Array(bins).fill(0); values.forEach(v => counts[Math.min(bins - 1, Math.max(0, Math.floor((v - lo) / step)))]++); const mx = Math.max(...counts);
+  let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`; counts.forEach((c, i) => { const bw = (w - 20) / bins, x = 10 + i * bw, bh = (h - 24) * c / (mx || 1); s += `<rect x="${x + 1}" y="${h - 20 - bh}" width="${bw - 2}" height="${bh}" fill="${o.color || "#17A398"}"><title>${fmt(lo + i * step, o.d || 0)}–${fmt(lo + (i + 1) * step, o.d || 0)}: ${c}</title></rect>`; });
+  if (o.mark != null) { const x = 10 + (o.mark - lo) / (hi - lo || 1) * (w - 20); s += `<line x1="${x}" x2="${x}" y1="4" y2="${h - 20}" stroke="var(--signal)" stroke-width="2"/>`; }
+  s += `<text x="10" y="${h - 6}" font-size="10" ${TXT}>${fmt(lo, o.d || 0)}</text><text x="${w - 10}" y="${h - 6}" font-size="10" ${TXT} text-anchor="end">${fmt(hi, o.d || 0)}</text>`; return s + "</svg>";
+}
+function svgSpark(vals, o = {}) { const w = o.w || 90, h = o.h || 22; if (!vals.length) return ""; const mx = o.max != null ? o.max : Math.max(1e-9, ...vals), mn = o.min != null ? o.min : 0; const X = i => 2 + i / Math.max(1, vals.length - 1) * (w - 4), Y = v => 2 + (1 - (v - mn) / (mx - mn || 1)) * (h - 4); const pts = vals.map((v, i) => `${X(i)},${Y(v)}`).join(" "); return `<svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${o.color || "var(--blue)"}" stroke-width="1.5"/><circle cx="${X(vals.length - 1)}" cy="${Y(vals[vals.length - 1])}" r="2.5" fill="${o.color || "var(--blue)"}"/></svg>`; }
+function barcode(runs, key) { return `<span class="barcode">${runs.map(r => { const o = outcome(r, key); return `<i style="background:var(--${o === "PASS" ? "pass" : o === "FAIL" ? "fail" : "unres"})" title="${esc(r.task_id)} r${r.repeat_index} ${o}"></i>`; }).join("")}</span>`; }
+function svgScatter(pts, o = {}) {
+  const w = o.w || 520, h = o.h || 300, ml = 52, mr = 16, mt = 14, mb = 40; if (!pts.length) return `<div class="empty">no cells</div>`;
+  const xv = pts.map(p => p.x).filter(Number.isFinite), yv = pts.map(p => p.y); const xlog = !!o.xlog;
+  const tx = x => xlog ? Math.log10(Math.max(x, 1e-6)) : x; let xmin = Math.min(...xv.map(tx)), xmax = Math.max(...xv.map(tx)); const pad = (xmax - xmin || 1) * 0.08; xmin -= pad; xmax += pad; const ymin = o.ymin != null ? o.ymin : 0, ymax = o.ymax != null ? o.ymax : Math.max(...yv, 1e-9);
+  const X = x => ml + (xmax > xmin ? (tx(x) - xmin) / (xmax - xmin) : 0.5) * (w - ml - mr), Y = y => mt + (1 - (y - ymin) / (ymax - ymin || 1)) * (h - mt - mb);
+  let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  for (let i = 0; i <= 4; i++) { const yy = ymin + (ymax - ymin) * i / 4; s += `<line x1="${ml}" x2="${w - mr}" y1="${Y(yy)}" y2="${Y(yy)}" ${GRID}/><text x="${ml - 6}" y="${Y(yy) + 4}" text-anchor="end" font-size="10" ${TXT}>${o.yfmt ? o.yfmt(yy) : fmt(yy, 2)}</text>`; }
+  let xt; if (xlog) { xt = []; const lo = Math.floor(Math.log10(Math.max(Math.min(...xv), 1e-6))), hi = Math.ceil(Math.log10(Math.max(...xv))); for (let d = lo; d <= hi; d++) [1, 2, 5].forEach(m => { const v = m * Math.pow(10, d); if (v >= Math.min(...xv) / 1.2 && v <= Math.max(...xv) * 1.2) xt.push(v); }); } else xt = [0, 1, 2, 3, 4].map(i => Math.min(...xv) + (Math.max(...xv) - Math.min(...xv)) * i / 4);
+  xt.forEach(x => { s += `<line x1="${X(x)}" x2="${X(x)}" y1="${mt}" y2="${h - mb}" ${GRID}/><text x="${X(x)}" y="${h - mb + 14}" text-anchor="middle" font-size="10" ${TXT}>${o.xfmt ? o.xfmt(x) : fmt(x, 2)}</text>`; });
+  s += `<text x="${(ml + w - mr) / 2}" y="${h - 4}" text-anchor="middle" font-size="11" ${TXT2}>${esc(o.xlabel || "")}</text>`;
+  if (o.ylabel) s += `<text x="12" y="${(mt + h - mb) / 2}" text-anchor="middle" font-size="11" ${TXT2} transform="rotate(-90 12 ${(mt + h - mb) / 2})">${esc(o.ylabel)}</text>`;
+  if (o.frontier) { const fr = pts.filter(p => Number.isFinite(p.x)).sort((a, b) => a.x - b.x); let best = -Infinity; const F = []; fr.forEach(p => { if (p.y > best) { best = p.y; F.push(p); } }); if (F.length > 1) s += `<polyline points="${F.map(p => X(p.x) + "," + Y(p.y)).join(" ")}" fill="none" stroke="var(--signal)" stroke-dasharray="4 3" stroke-width="1.5"/>`; }
+  pts.forEach((p, i) => { if (!Number.isFinite(p.x)) return; if (p.err) s += `<line x1="${X(p.x)}" x2="${X(p.x)}" y1="${Y(p.err[0])}" y2="${Y(p.err[1])}" stroke="${p.color || "var(--blue)"}" opacity=".5"/>`; s += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.r || 8}" fill="${p.color || "var(--blue)"}" opacity=".92"${p.act ? ` data-act="${p.act}" data-key="${esc(p.key || "")}" style="cursor:pointer"` : ""}><title>${esc(p.title || p.label)}</title></circle><text x="${X(p.x)}" y="${Y(p.y) + 3.5}" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" style="pointer-events:none">${i + 1}</text>`; });
+  s += "</svg>";
+  return s + `<div class="legend">${pts.map((p, i) => `<span${p.act ? ` data-act="${p.act}" data-key="${esc(p.key || "")}" style="cursor:pointer"` : ""}><i style="background:${p.color || "var(--blue)"}"></i>${i + 1} ${esc(p.label)}</span>`).join("")}</div>`;
+}
+function svgGantt(spans, o = {}) {
+  const w = o.w || 720, rowH = 14, items = spans.filter(s => ["chat", "execute_tool", "boundary_event", "grade"].includes(s.span));
+  let t = 0; const rows = items.map(s => { const d = Math.max(s.ms || 0, s.span === "chat" ? 1 : 1); const r = { s, t0: t, d }; t += d; return r; });
+  const total = Math.max(t, 1), h = rows.length * rowH + 30, ml = 150, mr = 10;
+  const X = ms => ml + ms / total * (w - ml - mr);
+  const col = s => s.span === "chat" ? "var(--ink)" : s.span === "boundary_event" ? "var(--fail)" : s.span === "grade" ? "var(--amber)" : (isEditSpan(s) ? "var(--teal)" : isTestSpan(s) ? "var(--blue)" : "var(--grey)");
+  let g = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => { g += `<line x1="${X(f * total)}" x2="${X(f * total)}" y1="4" y2="${h - 22}" ${GRID}/><text x="${X(f * total)}" y="${h - 8}" text-anchor="middle" font-size="10" ${TXT}>${ints(f * total)} ms</text>`; });
+  rows.forEach((r, i) => { const y = 4 + i * rowH; const lbl = r.s.span === "chat" ? `call ${r.s.step}` : r.s.span === "execute_tool" ? `${r.s.tool}${r.s.kind ? "/" + r.s.kind : ""}` : r.s.span; g += `<text x="${ml - 6}" y="${y + 10}" text-anchor="end" font-size="10" ${TXT2}>#${r.s.seq} ${esc(lbl).slice(0, 22)}</text><rect x="${X(r.t0)}" y="${y + 2}" width="${Math.max(2, X(r.t0 + r.d) - X(r.t0))}" height="${rowH - 4}" fill="${col(r.s)}" rx="2" data-act="scroll" data-seq="${r.s.seq}" style="cursor:pointer"><title>#${r.s.seq} ${esc(lbl)} · ${ints(r.d)} ms</title></rect>`; });
+  return g + "</svg>";
+}
+function svgTokens(spans, o = {}) {
+  const calls = spans.filter(s => s.span === "chat"); if (!calls.length || !calls.some(c => (c.in || 0) + (c.out || 0) > 0)) return calls.length ? `<div class="small">no token accounting in this ledger (imported run)</div>` : ""; const w = o.w || 720, h = o.h || 150, ml = 44, mr = 10, mt = 8, mb = 24;
+  const mx = Math.max(1, ...calls.map(c => (c.in || 0) + (c.out || 0))); const bw = (w - ml - mr) / calls.length; const Y = v => mt + (1 - v / mx) * (h - mt - mb);
+  let g = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  for (let i = 0; i <= 3; i++) { const v = mx * i / 3; g += `<line x1="${ml}" x2="${w - mr}" y1="${Y(v)}" y2="${Y(v)}" ${GRID}/><text x="${ml - 5}" y="${Y(v) + 4}" text-anchor="end" font-size="10" ${TXT}>${ints(v)}</text>`; }
+  calls.forEach((c, i) => { const x = ml + i * bw + 2; const inn = c.in || 0, out = c.out || 0; g += `<rect x="${x}" y="${Y(inn)}" width="${Math.max(2, bw - 4)}" height="${Y(0) - Y(inn)}" fill="var(--blue)" opacity=".85" data-act="scroll" data-seq="${c.seq}" style="cursor:pointer"><title>call ${c.step}: ${ints(inn)} in · ${ints(out)} out · ${usd(c.cost)}</title></rect><rect x="${x}" y="${Y(inn + out)}" width="${Math.max(2, bw - 4)}" height="${Y(inn) - Y(inn + out)}" fill="var(--signal)" data-act="scroll" data-seq="${c.seq}" style="cursor:pointer"><title>call ${c.step}: ${ints(out)} output tokens</title></rect><text x="${x + (bw - 4) / 2}" y="${h - 8}" text-anchor="middle" font-size="10" ${TXT}>${c.step}</text>`; });
+  g += "</svg>";
+  return g + `<div class="legend"><span><i style="background:var(--blue)"></i>input tokens (the transcript, re-sent every call)</span><span><i style="background:var(--signal)"></i>output tokens</span></div>`;
+}
+function heatTable(rowLabels, colLabels, M, o = {}) { // M[i][j] in [0,1] or counts; o.fmt for cell text; o.max for scale
+  const mx = o.max != null ? o.max : Math.max(1e-9, ...M.flat()); const color = v => { const t = Math.min(1, Math.max(0, v / mx)); return o.diverging ? (v >= 0 ? `rgba(23,163,152,${0.1 + 0.8 * t})` : `rgba(228,87,46,${0.1 + 0.8 * Math.min(1, -v / mx)})`) : `rgba(59,111,217,${0.06 + 0.84 * t})`; };
+  let h = `<table class="heat"><tr><th></th>${colLabels.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  rowLabels.forEach((r, i) => { h += `<tr><td class="lbl">${esc(r)}</td>${colLabels.map((c, j) => { const v = M[i][j]; return `<td style="background:${color(v)};color:${Math.abs(v) / mx > 0.55 ? "#fff" : "var(--ink)"}" title="${esc(r)} → ${esc(c)}: ${o.fmt ? o.fmt(v) : fmt(v, 2)}">${o.fmt ? o.fmt(v) : fmt(v, 2)}</td>`; }).join("")}</tr>`; });
+  return h + "</table>";
+}
+function seqHtml(seq, cur) { return `<span class="seq-view">${seq.split("").map((c, i) => `<b class="${c}${i === cur ? " cur" : ""}" title="${esc(CODE_NAME[c] || c)}">${c}</b>`).join("")}</span>`; }
+
+// ---- views_a.js
+// ============================================================ shared fragments
+function tile(v, l, s, act) { return `<div class="tile ${act ? "click" : ""}" ${act ? `data-act="tab" data-v="${act}"` : ""}><div class="v">${v}</div><div class="l">${esc(l)}</div>${s ? `<div class="s">${s}</div>` : ""}</div>`; }
+function outBadge(o) { return `<span class="out ${o}">${o}</span>`; }
+function predBadges(r) { const ps = predicates(spansOf(r)); const bad = ps.filter(p => p.ok === false); return bad.length ? bad.map(p => `<span class="badge bad" title="${esc(p.note)}">${esc(p.id)}</span>`).join("") : `<span class="badge ok">all predicates hold</span>`; }
+function empty(msg) { return `<div class="callout">${esc(msg || "No runs match the current filter.")}</div>`; }
+function harnessIds(R) { return uniq(R.map(r => r.harness_id)).concat(Object.keys(B.harnesses).filter(h => !R.some(r => r.harness_id === h))); }
+function ciText(lo, hi, d = 2) { return `[${fmt(lo, d)}, ${fmt(hi, d)}]`; }
+function okBadge(ok) { return ok === null ? '<span class="badge na">n/a</span>' : (ok ? '<span class="badge ok">yes</span>' : '<span class="badge bad">no</span>'); }
+
+// ============================================================ 0. Overview
+function findings(R, key) {
+  const out = [];
+  const tt = taskTable(R, key), tasks = Object.keys(tt); if (!tasks.length) return out;
+  const agg = aggregate(R, key);
+  const mixed = tasks.filter(t => tt[t].c > 0 && tt[t].c < tt[t].n).length;
+  out.push({ ic: "1", color: "var(--signal)", t: `${mixed} of ${tasks.length} tasks have mixed outcomes; pass@1 ${pct(agg.pass1, 1)} but pass^3 ${agg["pass^3"] != null ? pct(agg["pass^3"], 1) : "n/a"}.`, d: "Same cell, different verdicts. One run is one draw; a user experiences pass^k, a leaderboard reports pass@1.", tab: "dist" });
+  // harness effect: largest paired delta within one model
+  const models = uniq(R.map(r => r.model)); let best = null;
+  models.forEach(m => { const hs = uniq(R.filter(r => r.model === m).map(r => r.harness_id)); for (let i = 0; i < hs.length; i++) for (let j = 0; j < hs.length; j++) { if (i === j) continue; const a = R.filter(r => r.model === m && r.harness_id === hs[i]), b = R.filter(r => r.model === m && r.harness_id === hs[j]); const pb = pairedBootstrap(a, b, key); if (pb.n && (!best || Math.abs(pb.mean) > Math.abs(best.pb.mean))) best = { m, a: hs[i], b: hs[j], pb, tps: tokensPerSolve(b, key) / tokensPerSolve(a, key), ver: verifiedRate(b) - verifiedRate(a) }; } });
+  if (best) out.push({ ic: "2", color: "var(--amber)", t: `Largest harness effect: ${best.b} vs ${best.a} on ${best.m}, Δ pass rate ${(best.pb.mean >= 0 ? "+" : "") + pct(best.pb.mean, 1)} with 95% ${ciText(best.pb.lo, best.pb.hi)}${best.pb.lo <= 0 && best.pb.hi >= 0 ? " (covers zero)" : ""}.`, d: `Tokens per solve ${fmt(best.tps, 2)}×, verified-after-edit ${(best.ver >= 0 ? "+" : "") + pct(best.ver, 0)} points. The efficiency and conduct columns moved; the pass column may not have.`, tab: "harness" });
+  // oracle
+  const withVis = R.filter(r => r.visible_pass != null && r.hidden_pass != null); if (withVis.length) { const over = withVis.filter(r => r.visible_pass && !r.hidden_pass).length / withVis.length; const withStrong = R.filter(r => r.hidden_pass != null && r.strong_pass != null); const lost = withStrong.length ? withStrong.filter(r => r.hidden_pass && !r.strong_pass).length / withStrong.length : NaN; out.push({ ic: "3", color: "var(--teal)", t: `${pct(over, 1)} of runs pass the agent's own tests and fail the oracle${Number.isFinite(lost) ? `; ${pct(lost, 1)} pass the oracle and fail the strengthened suite` : ""}.`, d: "Self-report is not the verdict, and the verdict depends on the oracle. Switch the oracle chip to watch the ranking move.", tab: "integ" }); }
+  // attribution
+  const at = attribution(R, key).sort((a, b) => b.ochiai - a.ochiai)[0]; if (at) out.push({ ic: "4", color: "var(--purple)", t: `Top failure feature: ${at.id} (Ochiai ${fmt(at.ochiai, 2)}), in ${pct(at.rf)} of failures and ${pct(at.rp)} of successes.`, d: "Read both rate columns before calling it a cause; write it as a query and test it as a predicate.", tab: "attr" });
+  // cost
+  const cells = Array.from(groupsOf(R).entries()).map(([k, rs]) => ({ k: k.split("|").slice(1).join(" · "), p: passRate(rs, key), cop: costOfPass(rs, key) })).filter(c => Number.isFinite(c.cop)); if (cells.length > 1) { const cheapest = cells.slice().sort((a, b) => a.cop - b.cop)[0], bestp = cells.slice().sort((a, b) => b.p - a.p)[0]; out.push({ ic: "5", color: "var(--blue)", t: `Cheapest correct answer: ${cheapest.k} at ${usd(cheapest.cop)} per pass; highest pass rate: ${bestp.k} at ${pct(bestp.p, 0)}${cheapest.k === bestp.k ? " (same cell)" : ` for ${usd(bestp.cop)} per pass`}.`, d: "Accuracy without cost is half a result. The Pareto chart shows which cells are dominated.", tab: "tele" }); }
+  return out;
+}
+function vOverview() {
+  const R = filtered(), key = oracleKey();
+  let h = `<h2>Overview</h2><p class="claim">Every cell (model × harness) as a distribution, not a number. The findings are written from the data in the current filter; each one links to the view that shows the evidence.</p>`;
+  if (!R.length) return h + empty() + (MODE === "server" ? `<p class="small">Launch a batch from the Board, or copy a results directory under data/runs.</p>` : "");
+  const agg = aggregate(R, key), tt = agg ? agg.tt : {}, tasks = Object.keys(tt); const ci = bootstrapCI(tasks.map(t => tt[t].p));
+  const spend = sum(R.map(r => r.cost_usd || 0));
+  h += `<div class="tiles">${tile(R.length, "runs", `${uniq(R.map(r => r.model)).length} models · ${uniq(R.map(r => r.harness_id)).length} harnesses · ${tasks.length} tasks · ${uniq(R.map(r => r.results)).length} results dirs`, "board")}
+    ${tile(pct(agg ? agg.pass1 : NaN, 1), "pass@1, mean over tasks", "task-bootstrap 95% " + ciText(ci[0], ci[1]), "dist")}
+    ${tile(agg && agg["pass^3"] != null ? pct(agg["pass^3"], 1) : "n/a", "pass^3", agg && agg["pass@3"] != null ? "pass@3 " + pct(agg["pass@3"], 1) : "", "dist")}
+    ${tile(pct(flipRate(R, key)), "tasks with mixed outcomes", "", "dist")}
+    ${tile(pct(verifiedRate(R)), "verified after last edit", "P_verify", "traj")}
+    ${tile(usd(spend), "total spend in filter", usd(mean(R.map(r => r.cost_usd || 0))) + " per run", "tele")}
+    ${MODE === "server" ? tile(B.running.length + (B.jobs.filter(j => j.status === "running").length ? "" : ""), "runs in flight", B.jobs.filter(j => j.status === "running").length + " jobs running", "board") : tile("static", "export", "open with the server to launch runs", "board")}</div>`;
+  const F = findings(R, key);
+  h += `<div class="row"><div class="col" style="flex:1 1 520px"><div class="card plain" style="padding:0">${F.map(f => `<div class="finding"><span class="ic" style="background:${f.color}">${f.ic}</span><div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d)}</div></div><button class="btn small sec" data-act="tab" data-v="${f.tab}">open</button></div>`).join("") || '<div class="empty">no findings yet</div>'}</div></div>`;
+  const cells = Array.from(groupsOf(R).entries()).map(([k, rs], i) => ({ key: k, label: k.split("|").slice(1).join(" · "), x: costOfPass(rs, key), y: passRate(rs, key), n: graded(rs, key).length, color: SERIES[i % SERIES.length] }));
+  const pts = cells.filter(c => Number.isFinite(c.x) && Number.isFinite(c.y)).map(c => { const w = wilson(Math.round(c.y * c.n), c.n); return { ...c, err: w, title: `${c.label}: pass ${pct(c.y, 1)} · cost of pass ${usd(c.x)} · n=${c.n}`, act: "cellsel" }; });
+  h += `<div class="col" style="flex:1 1 480px"><h4>Cost of pass vs pass rate, one point per cell ${pts.length > 1 ? '<span class="small">(dashed: the Pareto frontier)</span>' : ""}</h4>${svgScatter(pts, { xlog: true, xlabel: "cost of pass (USD, log)", ylabel: "pass rate", ymax: 1, frontier: true, xfmt: x => usd(x), yfmt: y => pct(y) })}</div></div>`;
+  h += `<h3><span class="n">≡</span> Cells</h3><div class="tbl"><table><tr><th>results · model · harness</th><th class="num">runs</th><th class="num">pass@1</th><th class="num">Wilson 95%</th><th class="num">pass^3</th><th class="num">flip</th><th class="num">verified</th><th class="num">boundary</th><th class="num">tok/solve</th><th class="num">cost of pass</th><th>by repeat</th><th>outcomes</th></tr>`;
+  Array.from(groupsOf(R).entries()).forEach(([k, rs]) => { const g = graded(rs, key); const c = g.filter(r => r[key]).length; const w = wilson(c, g.length); const a = aggregate(rs, key); const byRep = Array.from(by(g, r => r.repeat_index).entries()).sort((x, y) => x[0] - y[0]).map(([, v]) => passRate(v, key)); const rsSorted = rs.slice().sort((x, y) => x.task_id.localeCompare(y.task_id) || x.repeat_index - y.repeat_index);
+    h += `<tr class="click" data-act="cellsel" data-key="${esc(k)}"><td><b>${esc(k.split("|").slice(1).join(" · "))}</b><div class="small">${esc(k.split("|")[0])}</div></td><td class="num">${rs.length}</td><td class="num">${pct(a ? a.pass1 : NaN, 1)}</td><td class="num">${ciText(w[0], w[1])}</td><td class="num">${a && a["pass^3"] != null ? pct(a["pass^3"]) : "n/a"}</td><td class="num">${pct(flipRate(rs, key))}</td><td class="num">${pct(verifiedRate(rs))}</td><td class="num">${pct(boundaryAny(rs))}</td><td class="num">${ints(tokensPerSolve(rs, key))}</td><td class="num">${usd(costOfPass(rs, key))}</td><td>${svgSpark(byRep, { max: 1 })}</td><td>${barcode(rsSorted.slice(0, 80), key)}</td></tr>`; });
+  h += `</table></div><p class="small">"by repeat": pass rate at repeat index 0, 1, 2, … (a drift check; flat is good). "outcomes": one bar per run, tasks in order.</p>`;
+  return h;
+}
+
+// ============================================================ 1. Board
+function vBoard() {
+  const R = filtered(), key = oracleKey();
+  let h = `<h2>Runs board</h2><p class="claim">One cell = one run = one draw from the distribution the cell (model, harness, task, oracle) defines. Switch the oracle above and watch the colours change: the runs did not change, the verdict did. Click a cell to open the run; shift-click to add it to a multi-run comparison.</p>`;
+  if (!R.length && !B.running.length) return h + empty() + vLaunch();
+  h += `<div class="legend"><span><i style="background:var(--pass)"></i>PASS (oracle true)</span><span><i style="background:var(--fail)"></i>FAIL (submitted, oracle false)</span><span><i style="background:var(--unres)"></i>UNRESOLVED (ended by the harness) or ungraded</span><span><i style="background:var(--amber)"></i>running</span>${S.multi.size ? `<span><b>${S.multi.size} selected</b> · <button class="btn small" data-act="multiOpen">compare selected</button> <button class="btn small sec" data-act="multiClear">clear</button></span>` : ""}</div>`;
+  const groups = groupsOf(R);
+  const runningBy = by(B.running.filter(x => (!S.results.size || S.results.has(x.results))), x => `${x.results}|${x.model}|${x.harness_id}`);
+  const allKeys = uniq(Array.from(groups.keys()).concat(Array.from(runningBy.keys())));
+  h += `<div class="row">`;
+  allKeys.forEach(gk => {
+    const rs = groups.get(gk) || [], live = runningBy.get(gk) || []; const [res, model, hid] = gk.split("|");
+    const taskIds = uniq(rs.map(r => r.task_id).concat(live.map(x => x.task_id))).sort();
+    const nrep = Math.max(1, ...rs.map(r => r.repeat_index + 1), ...taskIds.map(t => live.filter(x => x.task_id === t).length + rs.filter(r => r.task_id === t).length));
+    const a = aggregate(rs, key);
+    h += `<div class="col" style="flex:0 1 auto"><div class="card"><h4>${esc(model)} <span class="small">×</span> ${esc(hid)} <span class="small">· ${esc(res)} · ${rs.length} runs${a ? " · pass@1 " + pct(a.pass1, 0) : ""}${live.length ? ` · <span style="color:var(--amber)">${live.length} running</span>` : ""}</span></h4><table class="grid"><tr><td></td>${Array.from({ length: Math.min(nrep, 40) }, (_, i) => `<td class="small" style="text-align:center">${i}</td>`).join("")}</tr>`;
+    taskIds.slice(0, 60).forEach(t => {
+      const row = rs.filter(r => r.task_id === t).sort((x, y) => x.repeat_index - y.repeat_index);
+      const lv = live.filter(x => x.task_id === t);
+      h += `<tr><td class="small" style="padding-right:8px;white-space:nowrap">${esc(t.length > 26 ? t.slice(0, 24) + "…" : t)}</td>`;
+      const uniqRep = uniq(row.map(x => x.repeat_index)).length === row.length;
+      for (let i = 0; i < Math.min(nrep, 40); i++) { const r = uniqRep ? (row.find(x => x.repeat_index === i) || null) : (row[i] || null); if (r) { const o = outcome(r, key); h += `<td><span class="cell ${o}${S.sel === r.key ? " sel" : ""}${S.multi.has(r.key) ? " multi" : ""}" data-act="sel" data-key="${esc(r.key)}" title="${esc(r.run_id)} · ${o} · ${r.steps} steps · ${ints(tokOf(r))} tokens · ${usd(r.cost_usd)} · exit ${r.exit_reason}"></span></td>`; } else if (lv.length && i >= row.length && i < row.length + lv.length) { const x = lv[i - row.length]; h += `<td><span class="cell RUN" title="running · step ${x.steps} · last tool ${x.last_tool || "?"}"></span></td>`; } else h += `<td><span class="cell" style="background:var(--card2);cursor:default"></span></td>`; }
+      h += `</tr>`;
+    });
+    h += `</table>${taskIds.length > 60 ? `<div class="small">first 60 of ${taskIds.length} tasks; narrow the filter</div>` : ""}</div></div>`;
+  });
+  h += `</div>`;
+  h += vLaunch();
+  return h;
+}
+const PRESETS = {
+  "": { label: "custom" },
+  smoke: { label: "smoke test (mock, 1 task)", provider: "mock", model: "mock", harness: "harnesses/baseline.json", tasks: "t01_slugify", repeats: 2, out: "data/runs/smoke" },
+  ex1: { label: "ex 1 · variance (mock, 8 tasks × 10)", provider: "mock", model: "mock", harness: "harnesses/baseline.json", tasks: "all", repeats: 10, out: "data/runs/ex1" },
+  ex2: { label: "ex 2 · harness differential (mock, 6 harnesses)", provider: "mock", model: "mock", harness: "harnesses/baseline.json,harnesses/no_test_tool.json,harnesses/permissive.json,harnesses/short_context.json,harnesses/tight_budget.json,harnesses/terse_prompt.json", tasks: "all", repeats: 5, out: "data/runs/ex2" },
+  live: { label: "live · 2 harnesses × 5 tasks × 4 (OpenRouter)", provider: "openrouter", model: "anthropic/claude-sonnet-5", harness: "harnesses/baseline.json,harnesses/no_test_tool.json", tasks: "t01_slugify,t03_ratelimit,t06_injected_config,t07_cache_cleanup,t08_ambiguous_handler", repeats: 4, out: "data/runs/live" },
+  ex8: { label: "ex 8 · third model level (OpenRouter, 2 harnesses × 8 × 3)", provider: "openrouter", model: "openai/gpt-5.6-sol", harness: "harnesses/baseline.json,harnesses/no_test_tool.json", tasks: "all", repeats: 3, out: "data/runs/live_ex8" },
+};
+function launchEstimate(spec) {
+  const nH = (spec.harness || "").split(",").filter(Boolean).length || 1; const nT = spec.tasks === "all" ? Object.keys(B.tasks).length : (spec.tasks || "").split(",").filter(Boolean).length; const n = nH * nT * Number(spec.repeats || 1);
+  if (spec.provider === "mock") return { n, cost: 0, note: "mock: no API calls" };
+  const m = (spec.model || "").toLowerCase(); const keys = Object.keys(B.prices || {}).sort((a, b) => b.length - a.length); const k = keys.find(x => m.includes(x)); const [pi, po] = k ? B.prices[k] : [2, 10];
+  const per = 40000 / 1e6 * pi + 3000 / 1e6 * po; return { n, cost: n * per, note: `${k ? k : "unknown model, mid-tier guess"} at $${pi}/$${po} per M; planning assumption 40k in + 3k out tokens per run` };
+}
+function vLaunch() {
+  let h = "";
+  if (B.jobs && B.jobs.length) {
+    h += `<h3><span class="n">⟳</span> Jobs launched from the console <button class="btn small sec" data-act="jobsToggle">${S.jobsOpen ? "hide" : "show"}</button></h3>`;
+    if (S.jobsOpen) { h += `<div class="tbl"><table><tr><th>id</th><th>started</th><th>status</th><th>progress</th><th class="num">spent</th><th class="num">projected</th><th class="num">eta</th><th>command</th><th>last line</th><th></th></tr>`;
+      B.jobs.slice().reverse().forEach(j => { const frac = j.total ? j.done / j.total : 0; const last = (j.tail || "").trim().split("\n").slice(-1)[0] || ""; h += `<tr><td>${esc(j.id)}</td><td>${esc(j.started)}</td><td>${j.status === "running" ? '<span class="badge warn">running</span>' : (j.status === "done" ? '<span class="badge ok">done</span>' : `<span class="badge bad">${esc(j.status)}</span>`)}</td><td><div class="progress ${j.status === "running" ? "run" : ""}"><i style="width:${(frac * 100).toFixed(0)}%"></i></div><div class="small">${j.done}/${j.total || "?"}</div></td><td class="num">${usd(j.spent)}</td><td class="num">${j.projected != null ? usd(j.projected) : ""}</td><td class="num">${j.eta_s != null ? secs(j.eta_s) : ""}</td><td class="mono small" style="max-width:360px;word-break:break-all">${esc(j.cmd)}</td><td class="mono small" style="max-width:300px">${esc(last.slice(0, 120))}</td><td>${j.status === "running" ? `<button class="btn small danger" data-act="cancel" data-id="${esc(j.id)}">cancel</button>` : ""}</td></tr>`; });
+      h += `</table></div>`; }
+  }
+  if (MODE !== "server") return h + `<p class="small" style="margin-top:18px">This is a static export. Start <code>python -m harnesslab.core.serve</code> in the lab folder to launch runs from here and watch them land.</p>`;
+  const hs = Object.values(B.harnesses).map(x => x._file ? x._file : null).filter(Boolean);
+  const p = PRESETS[S.preset] || {};
+  const spec = { provider: p.provider || "mock", model: p.model || "mock", harness: p.harness || (hs[0] || "harnesses/baseline.json"), tasks: p.tasks || "all", repeats: p.repeats || 3, out: p.out || "data/runs/live" };
+  const est = launchEstimate(spec);
+  h += `<h3><span class="n">+</span> Launch runs</h3><div class="card"><div class="form">
+    <label>preset<select data-act="preset">${Object.entries(PRESETS).map(([k, v]) => `<option value="${k}" ${S.preset === k ? "selected" : ""}>${esc(v.label)}</option>`).join("")}</select></label>
+    <label>provider<select id="l_provider">${["mock", "openrouter", "anthropic", "openai"].map(x => `<option ${spec.provider === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+    <label>model<input id="l_model" value="${esc(spec.model)}" placeholder="anthropic/claude-sonnet-5 (openrouter) / mock-weak"></label>
+    <label>harness file(s)<input id="l_harness" value="${esc(spec.harness)}" list="hlist"><datalist id="hlist">${hs.map(x => `<option value="${esc(x)}">`).join("")}</datalist></label>
+    <label>tasks<input id="l_tasks" value="${esc(spec.tasks)}" placeholder="all or t01_slugify,t03_ratelimit"></label>
+    <label>repeats<input id="l_repeats" type="number" value="${spec.repeats}" min="1" max="50"></label>
+    <label>seed<input id="l_seed" type="number" value="0"></label>
+    <label>output dir<input id="l_out" value="${esc(spec.out)}"></label>
+    <label>base url (optional)<input id="l_base" placeholder="OpenRouter / Ollama endpoint"></label>
+    <button class="btn" data-act="launch">Launch</button></div>
+    <div class="small" style="margin:8px 0 0" id="launch_est">${est.n} runs · planning estimate ${est.cost ? usd(est.cost) : "$0"} (${esc(est.note)}). The key is read from the terminal that started the server (OPENROUTER_API_KEY, ANTHROPIC_API_KEY or OPENAI_API_KEY). Several harness files separated by commas run one after another into the same output directory, so one board shows all cells.</div><div id="launch_msg" class="small"></div></div>`;
+  return h;
+}
+
+// ============================================================ 2. Harness
+const HFIELDS = [["P", "system_prompt", "prompt and task presentation"], ["C", "context_window", "context management (0 = full history)"], ["C", "observation_chars", "observation truncation"], ["A", "tools", "action space"], ["O", "include_file_listing", "observation: file listing in the prompt"], ["S", "max_steps", "stopping rule: step cap (plus the submit tool)"], ["B", "max_total_tokens", "token budget per run"], ["B", "max_tokens_per_call", "output budget per call"], ["R_c", "temperature", "control randomness"], ["", "policy", "permission policy"], ["", "notes", "notes"]];
+function hval(h, k) { const v = h[k]; if (Array.isArray(v)) return v.join(", "); if (v == null) return "—"; return String(v); }
+function vHarness() {
+  const R = filtered(), key = oracleKey(); const ids = harnessIds(R);
+  if (!ids.length) return `<h2>Harness</h2>` + empty("No harness configs found.");
+  if (!S.hA || !B.harnesses[S.hA]) S.hA = ids[0]; if (!S.hB || !B.harnesses[S.hB]) S.hB = ids[1] || ids[0];
+  const A = B.harnesses[S.hA], Bh = B.harnesses[S.hB];
+  let h = `<h2>The harness is a hidden variable</h2><p class="claim">H = (P, C, A, O, S, B, R<sub>c</sub>): prompt, context management, action space, observation formatting, stopping rule, budget, control randomness. Two harnesses, one model: fields that differ are highlighted, and the table shows which measured columns move.</p>`;
+  const pick = (id, cur) => `<select data-act="${id}">${ids.map(x => `<option ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
+  h += `<div class="row"><div class="col"><div class="card"><h4>A: ${pick("hA", S.hA)} <span class="small">${esc(A._file || "from ledger")}</span></h4>${HFIELDS.map(([sym, k, lab]) => `<div class="hfield ${hval(A, k) !== hval(Bh, k) ? "diff" : ""}"><span class="sym">${sym}</span><span class="k">${esc(lab)}</span><span class="v">${esc(hval(A, k))}</span></div>`).join("")}</div></div>`;
+  h += `<div class="col"><div class="card"><h4>B: ${pick("hB", S.hB)} <span class="small">${esc(Bh._file || "from ledger")}</span></h4>${HFIELDS.map(([sym, k, lab]) => `<div class="hfield ${hval(A, k) !== hval(Bh, k) ? "diff" : ""}"><span class="sym">${sym}</span><span class="k">${esc(lab)}</span><span class="v">${esc(hval(Bh, k))}</span></div>`).join("")}</div></div></div>`;
+  const models = uniq(R.map(r => r.model));
+  h += `<h3><span class="n">1</span> Columns that move (${models.length === 1 ? "model " + esc(models[0]) : models.length + " models pooled; filter to one model for a clean comparison"})</h3><div class="tbl"><table><tr><th>harness</th><th class="num">runs</th><th class="num">pass@1</th><th class="num">Wilson 95%</th><th class="num">pass^3</th><th class="num">flip</th><th class="num">steps</th><th class="num">tok/run</th><th class="num">tok/solve</th><th class="num">$/pass</th><th class="num">verified</th><th class="num">boundary</th><th class="num">tests edited</th><th>exit reasons</th></tr>`;
+  uniq(R.map(r => r.harness_id)).forEach(hid => { const rs = R.filter(r => r.harness_id === hid); const a = aggregate(rs, key); const g = graded(rs, key); const c = g.filter(r => r[key]).length; const w = wilson(c, g.length);
+    h += `<tr class="${hid === S.hA || hid === S.hB ? "selrow" : ""}"><td><b>${esc(hid)}</b>${hid === S.hA ? ' <span class="badge info">A</span>' : ""}${hid === S.hB ? ' <span class="badge info">B</span>' : ""}</td><td class="num">${rs.length}</td><td class="num">${pct(a ? a.pass1 : NaN, 1)}</td><td class="num">${ciText(w[0], w[1])}</td><td class="num">${a && a["pass^3"] != null ? pct(a["pass^3"], 0) : "n/a"}</td><td class="num">${pct(flipRate(rs, key))}</td><td class="num">${fmt(mean(rs.map(r => r.steps)), 1)}</td><td class="num">${ints(mean(rs.map(tokOf)))}</td><td class="num">${ints(tokensPerSolve(rs, key))}</td><td class="num">${usd(costOfPass(rs, key))}</td><td class="num">${pct(verifiedRate(rs))}</td><td class="num">${pct(boundaryAny(rs))}</td><td class="num">${pct(mean(rs.map(r => r.tests_modified ? 1 : 0)))}</td><td class="small">${exitMix(rs).map(([k, v]) => `${esc(k)} ${pct(v)}`).join(", ")}</td></tr>`; });
+  h += `</table></div>`;
+  const rA = R.filter(r => r.harness_id === S.hA), rB = R.filter(r => r.harness_id === S.hB);
+  if (rA.length && rB.length && S.hA !== S.hB) {
+    const pb = pairedBootstrap(rA, rB, key);
+    h += `<h3><span class="n">2</span> Δ<sub>H</sub> = E[Y | M, ${esc(S.hB)}, T] − E[Y | M, ${esc(S.hA)}, T]</h3><div class="row"><div class="col"><div class="tiles">${tile((pb.mean >= 0 ? "+" : "") + pct(pb.mean, 1), "paired mean difference (B − A)", `task-bootstrap 95% ${ciText(pb.lo, pb.hi)} · ${pb.n} paired tasks`)}${tile(ints(tokensPerSolve(rB, key) / tokensPerSolve(rA, key) * 100) + "%", "tokens per solve, B as % of A", "the efficiency column moves even when pass@1 does not")}${tile(pct(verifiedRate(rB) - verifiedRate(rA), 0), "Δ verified-after-edit", "conduct column")}${tile(ints(powerN(passRate(rA, key), passRate(rB, key))), "runs per arm to detect this Δ", "two-proportion, α = 0.05, power 0.8")}</div>
+    <div class="callout ${pb.lo <= 0 && pb.hi >= 0 ? "" : "teal"}">${pb.lo <= 0 && pb.hi >= 0 ? "The interval covers zero: with " + pb.n + " tasks the harness effect on pass rate is not distinguishable from noise. Look at the other columns." : "The interval excludes zero: the harness moved the pass rate on these tasks."} Tasks are the unit of resampling because the same tasks were run under both harnesses.</div></div>
+    <div class="col">${svgBar(Object.entries(pb.per_task).map(([t, d]) => ({ label: t, value: Math.abs(d), text: (d >= 0 ? "+" : "−") + pct(Math.abs(d), 0), color: d >= 0 ? "#17A398" : "#E4572E" })), { w: 440, lw: 150, max: 1 })}<div class="small">per-task difference in pass rate (B − A); bar length = |Δ|</div></div></div>`;
+    // per-model breakdown
+    if (models.length > 1) { h += `<h4 style="margin-top:14px">The same contrast, per model</h4><div class="tbl"><table><tr><th>model</th><th class="num">A pass</th><th class="num">B pass</th><th class="num">paired Δ</th><th class="num">95%</th><th class="num">tok/solve ratio</th></tr>${models.map(m => { const a = rA.filter(r => r.model === m), b = rB.filter(r => r.model === m); if (!a.length || !b.length) return ""; const p = pairedBootstrap(a, b, key); return `<tr><td><b>${esc(m)}</b></td><td class="num">${pct(passRate(a, key), 1)}</td><td class="num">${pct(passRate(b, key), 1)}</td><td class="num">${(p.mean >= 0 ? "+" : "") + pct(p.mean, 1)}</td><td class="num">${ciText(p.lo, p.hi)}</td><td class="num">${fmt(tokensPerSolve(b, key) / tokensPerSolve(a, key), 2)}×</td></tr>`; }).join("")}</table></div><p class="small">Same sign everywhere: the harness effect transfers. Different signs: it is model-specific (the interaction term in the Experiment view).</p>`; }
+  }
+  if (MODE === "server") {
+    h += `<h3><span class="n">3</span> Make your own harness (saves to harnesses/&lt;id&gt;.json)</h3><div class="card"><div class="form">
+      <label>id<input id="e_id" value="mine"></label><label>tools (comma list)<input id="e_tools" value="${esc(hval(A, "tools"))}"></label><label>policy<select id="e_policy"><option ${A.policy === "strict" ? "selected" : ""}>strict</option><option ${A.policy === "permissive" ? "selected" : ""}>permissive</option></select></label>
+      <label>max_steps<input id="e_steps" type="number" value="${A.max_steps}"></label><label>context_window<input id="e_ctx" type="number" value="${A.context_window}"></label><label>observation_chars<input id="e_obs" type="number" value="${A.observation_chars}"></label><label>temperature<input id="e_temp" type="number" step="0.1" value="${A.temperature}"></label><label>max_total_tokens<input id="e_tok" type="number" value="${A.max_total_tokens}"></label></div>
+      <label style="display:block;margin-top:8px;font-size:11px;color:var(--muted);text-transform:uppercase">system prompt</label><textarea id="e_prompt" style="width:100%;min-height:90px">${esc(A.system_prompt)}</textarea>
+      <label style="display:block;margin-top:8px;font-size:11px;color:var(--muted);text-transform:uppercase">your prediction (which columns will move, and which way)</label><textarea id="e_pred" style="width:100%;min-height:50px" placeholder="written before measuring; saved into the harness notes">${esc(load("pred." + (A.id || ""), ""))}</textarea>
+      <div style="margin-top:8px"><button class="btn" data-act="saveHarness">Save harness</button> <span class="small" id="h_msg">Then launch it from the Board with the new file.</span></div></div>`;
+  }
+  return h;
+}
+
+// ---- views_b.js
+// ============================================================ 3. Trajectories
+function vTraj() {
+  const R = filtered();
+  let h = `<h2>Trajectory as first-class data</h2><p class="claim">τ = (s₀, a₀, o₁, s₁, …). Two runs can have the same outcome and nothing else in common. The predicates below are evaluated on the ledger, not on the agent's own account of what it did.</p>`;
+  h += `<div class="tabsmall">${[["list", "Run list"], ["viewer", "Viewer"], ["compare", "Compare two"], ["multi", `Compare selected (${S.multi.size})`]].map(([id, l]) => `<button class="${S.trajTab === id ? "on" : ""}" data-act="trajTab" data-v="${id}">${l}</button>`).join("")}<span class="small">shortcuts: <span class="kbd">j</span>/<span class="kbd">k</span> next / previous run · <span class="kbd">m</span> add to selection</span></div>`;
+  if (S.trajTab === "list") return h + trajList(R);
+  if (S.trajTab === "viewer") return h + trajViewer();
+  if (S.trajTab === "multi") return h + trajMulti();
+  return h + trajCompare(R);
+}
+function listRows(R) {
+  const key = oracleKey(); let rows = R.slice();
+  if (S.trajOutcome) rows = rows.filter(r => outcome(r, key) === S.trajOutcome);
+  if (S.trajTask) rows = rows.filter(r => r.task_id === S.trajTask);
+  const sorters = { run: (a, b) => a.run_id.localeCompare(b.run_id), task: (a, b) => a.task_id.localeCompare(b.task_id) || a.repeat_index - b.repeat_index, steps: (a, b) => b.steps - a.steps, tokens: (a, b) => tokOf(b) - tokOf(a), cost: (a, b) => (b.cost_usd || 0) - (a.cost_usd || 0), outcome: (a, b) => outcome(a, key).localeCompare(outcome(b, key)), fails: (a, b) => predicates(spansOf(b)).filter(p => p.ok === false).length - predicates(spansOf(a)).filter(p => p.ok === false).length };
+  return rows.sort(sorters[S.trajSort] || sorters.run);
+}
+function trajList(R) {
+  const key = oracleKey(); const rows = listRows(R); const PAGE = 100, page = Math.min(S.listPage, Math.max(0, Math.ceil(rows.length / PAGE) - 1)); const view = rows.slice(page * PAGE, (page + 1) * PAGE);
+  const th = (id, label, num) => `<th class="sort ${num ? "num" : ""}" data-act="trajSort" data-v="${id}">${label}${S.trajSort === id ? " ▾" : ""}</th>`;
+  let h = `<div class="toolbar"><label class="small">outcome <select data-act="trajOutcome"><option value="">all</option>${["PASS", "FAIL", "UNRESOLVED", "UNGRADED"].map(o => `<option ${S.trajOutcome === o ? "selected" : ""}>${o}</option>`).join("")}</select></label><label class="small">task <select data-act="trajTask"><option value="">all</option>${uniq(R.map(r => r.task_id)).sort().map(t => `<option ${S.trajTask === t ? "selected" : ""}>${t}</option>`).join("")}</select></label><span class="small">${rows.length} runs · page ${page + 1}/${Math.max(1, Math.ceil(rows.length / PAGE))}</span>${rows.length > PAGE ? `<button class="btn small sec" data-act="page" data-v="-1">‹</button><button class="btn small sec" data-act="page" data-v="1">›</button>` : ""}<button class="btn small sec" data-act="csv">export CSV</button>${S.multi.size ? `<button class="btn small" data-act="multiOpen">compare ${S.multi.size} selected</button><button class="btn small sec" data-act="multiClear">clear</button>` : ""}</div>`;
+  h += `<div class="tbl"><table><tr><th><input type="checkbox" class="check" data-act="multiPage" title="select this page"></th>${th("run", "run")}${th("task", "task")}<th>cell</th>${th("outcome", "outcome")}${th("steps", "steps", 1)}${th("tokens", "tokens", 1)}${th("cost", "cost", 1)}<th>action sequence</th>${th("fails", "predicates that fail")}<th>exit</th></tr>`;
+  view.forEach(r => { h += `<tr class="click ${S.sel === r.key ? "selrow" : ""}" data-act="sel" data-key="${esc(r.key)}"><td><input type="checkbox" class="check" data-act="multiToggle" data-key="${esc(r.key)}" ${S.multi.has(r.key) ? "checked" : ""}></td><td class="mono">${esc(runShort(r))}</td><td>${esc(r.task_id)}<div class="small">r${r.repeat_index}</div></td><td class="small">${esc(cellLabel(r))}</td><td>${outBadge(outcome(r, key))}</td><td class="num">${r.steps}</td><td class="num">${ints(tokOf(r))}</td><td class="num">${usd(r.cost_usd)}</td><td>${seqHtml(seqOf(r))}</td><td>${predBadges(r)}</td><td class="small">${esc(r.exit_reason)}</td></tr>`; });
+  h += `</table></div><p class="small">Alphabet: L list · R read/view · F search · W write · E edit · T run tests · B bash/other · S submit. Click a row to open it; the checkbox adds it to a multi-run comparison.</p>`;
+  return h;
+}
+function spanHtml(s, hl, prevContent) {
+  const cls = { chat: "chat", execute_tool: "tool", edit: "edit", boundary_event: "boundary", grade: "grade", invoke_agent: "invoke" }[s.span] || "";
+  let body = "";
+  if (s.span === "chat") body = `<div>${esc(s.text) || "<span class='small'>(no text)</span>"}</div>${(s.calls || []).map(c => `<div class="args mono">→ ${esc(c.name)}(${esc(Object.entries(c.args || {}).map(([k, v]) => k + "=" + JSON.stringify(String(v).slice(0, 160))).join(", "))})</div>`).join("")}<div class="small">gen_ai.usage.input_tokens=${s.in} · output_tokens=${s.out} · ${s.ms} ms · ${usd(s.cost)} · finish ${esc((s.finish || []).join(","))}</div>`;
+  else if (s.span === "execute_tool") {
+    const args = s.args || {}; const argText = Object.entries(args).filter(([k]) => !(s.tool === "write_file" && k === "content") && !(s.tool === "edit_file" && (k === "old" || k === "new"))).map(([k, v]) => k + "=" + JSON.stringify(String(v).slice(0, 200))).join(", ");
+    body = `<div class="args mono">${esc(s.tool)}${s.kind ? `<span class="badge info">${esc(s.kind)}</span>` : ""}(${esc(argText)}) <span class="badge ${s.status === "ok" ? "ok" : "bad"}">${esc(s.status)}</span> <span class="small">${s.ms} ms</span></div>`;
+    if (s.tool === "edit_file" && args.old != null) body += diffHtml(lineDiff(String(args.old), String(args.new || "")), 1);
+    else if (s.tool === "write_file" && args.content != null) body += prevContent != null ? diffHtml(lineDiff(prevContent, String(args.content)), 2) : `<details><summary class="small">new file content (${String(args.content).split("\n").length} lines)</summary><pre>${esc(String(args.content).slice(0, 4000))}</pre></details>`;
+    if (s.preview) body += `<pre>${esc(s.preview)}</pre>`;
+  }
+  else if (s.span === "edit") body = `<div>edited <code>${esc(s.path)}</code> via ${esc(s.tool)}: <span style="color:var(--teal)">+${s.la}</span> / <span style="color:var(--fail)">−${s.lr}</span> lines</div>`;
+  else if (s.span === "boundary_event") body = `<div><b>${esc(s.kind)}</b> via ${esc(s.tool)} · <span class="badge ${s.status === "blocked" ? "warn" : "bad"}">${esc(s.status)}</span> <span class="mono">${esc(JSON.stringify(s.args))}</span></div>`;
+  else if (s.span === "grade") body = `<div>oracle: visible ${s.visible == null ? "n/a" : s.visible ? "✔" : "✘"} · hidden ${s.hidden == null ? "n/a" : s.hidden ? "✔" : "✘"} · strengthened ${s.strong == null ? "n/a" : s.strong ? "✔" : "✘"} · tests modified ${s.tests_modified ? "yes" : "no"}</div>`;
+  else if (s.span === "invoke_agent") body = s.status === "start" ? `<div class="small">run start · harness config recorded in this span</div>` : `<div>run end · exit <b>${esc(s.exit_reason)}</b> · ${ints(s.total_tokens)} tokens · ${usd(s.cost)}</div>`;
+  return `<div class="span ${cls} ${hl === s.seq ? "hl" : ""}" id="sp_${s.seq}"><div class="hd"><span class="seq">#${s.seq}</span><span class="kind">${esc(s.span)}${s.span === "chat" && s.step != null ? " · step " + s.step : ""}</span></div>${body}</div>`;
+}
+function trajViewer() {
+  const r = S.sel ? runByKey(S.sel) : null;
+  if (!r) return empty("Pick a run from the list or click a cell on the Board.");
+  const det = S.detail[r.key]; const spans = spansOf(r); const ps = predicates(spans); const tools = toolSpans(spans); const seq = tools.map(codeOf).join("");
+  const curIdx = S.hl != null ? tools.findIndex(s => s.seq === S.hl) : -1;
+  const R = listRows(filtered()); const pos = R.findIndex(x => x.key === r.key);
+  let h = `<div class="toolbar"><button class="btn small sec" data-act="nav" data-v="-1" ${pos <= 0 ? "disabled" : ""}>‹ previous</button><span class="small">${pos + 1} / ${R.length} in the current list</span><button class="btn small sec" data-act="nav" data-v="1" ${pos >= R.length - 1 ? "disabled" : ""}>next ›</button><button class="btn small sec" data-act="multiToggle" data-key="${esc(r.key)}">${S.multi.has(r.key) ? "remove from selection" : "add to selection"}</button><button class="btn small sec" data-act="trajTab" data-v="compare">compare with another run of ${esc(r.task_id)}</button><button class="btn small sec" data-act="runjson">run JSON</button></div>`;
+  h += `<div class="row"><div class="col" style="flex:2 1 560px"><div class="card"><h4>${esc(r.run_id)} <span class="small">${esc(r.results)}</span></h4><div class="kv"><div>cell</div><div><b>${esc(r.model)}</b> × <b>${esc(r.harness_id)}</b> × <b>${esc(r.task_id)}</b> · repeat ${r.repeat_index}</div><div>outcome</div><div>visible ${r.visible_pass == null ? "n/a" : r.visible_pass ? "✔" : "✘"} · hidden ${r.hidden_pass == null ? "n/a" : r.hidden_pass ? "✔" : "✘"} · strengthened ${r.strong_pass == null ? "n/a" : r.strong_pass ? "✔" : "✘"} → under the selected oracle: ${outBadge(outcome(r))}</div><div>exit</div><div>${esc(r.exit_reason)} after ${r.steps} model calls, ${r.tool_calls} tool calls, ${r.edits} edits (${r.lines_added}+/${r.lines_removed}−) in ${(r.files_touched || []).join(", ") || "no files"}</div><div>telemetry</div><div>${ints(r.input_tokens)} in + ${ints(r.output_tokens)} out tokens · ${usd(r.cost_usd)} · ${ints(latencyOf(r))} ms model time${r.boundary_events ? ` · <span class="badge bad">${r.boundary_events} boundary event(s)</span>` : ""}</div><div>sequence</div><div>${seqHtml(seq, curIdx)}</div></div>${svgTokens(spans, { w: 640, h: 130 })}</div>`;
+  h += `<div class="card"><h4>Predicates on this trajectory</h4><table class="predicates" style="width:100%"><tr><th>predicate</th><th>formula</th><th>holds</th><th>evidence</th></tr>${ps.map(p => `<tr ${p.at != null ? `class="click" data-act="scroll" data-seq="${p.at}"` : ""}><td>${esc(p.label)}</td><td class="mono">${esc(p.formula)}</td><td>${okBadge(p.ok)}</td><td class="small">${esc(p.note)}${p.at != null ? ` <span class="small">(span #${p.at})</span>` : ""}</td></tr>`).join("")}</table></div>`;
+  h += `<div class="card"><h4>Timeline over model and tool time <span class="small">(click a bar to jump)</span></h4>${svgGantt(spans, { w: 640 })}</div>`;
+  if (MODE === "server" && !det) h += `<div class="small">Loading the untruncated ledger and the patch…</div>`;
+  if (det && det.patch) h += `<div class="card"><h4>patch.diff</h4>${diffHtml(det.patch.split("\n").map(l => [l.startsWith("+") && !l.startsWith("+++") ? "add" : l.startsWith("-") && !l.startsWith("---") ? "del" : "ctx", l]), 99)}</div>`;
+  // timeline with diffs against the previous write of the same file
+  const lastContent = {}; let tl = "";
+  spans.forEach(s => { let prev = null; if (s.span === "execute_tool" && s.tool === "write_file" && s.args && s.args.path) { prev = lastContent[s.args.path] != null ? lastContent[s.args.path] : null; lastContent[s.args.path] = s.args.content; } if (s.span === "execute_tool" && s.tool === "read_file" && s.preview && !/\[\+\d+ chars\]/.test(s.preview)) { const raw = s.preview.replace(/^\s*\d+\| ?/gm, ""); if (s.args && s.args.path && lastContent[s.args.path] == null) lastContent[s.args.path] = raw; } tl += spanHtml(s, S.hl, prev); });
+  h += `</div><div class="col" style="flex:3 1 640px"><h4 style="margin:8px 0">Ledger (${spans.length} spans)</h4><div class="timeline">${tl}</div></div></div>`;
+  return h;
+}
+function trajCompare(R) {
+  const a = S.sel ? runByKey(S.sel) : null; if (!a) return empty("Select a run first (Run list or Board), then pick a second run of the same task here.");
+  const cands = R.filter(r => r.task_id === a.task_id && r.key !== a.key);
+  let h = `<div class="card"><b>τ₁</b> = ${esc(a.run_id)} (${esc(cellLabel(a))}, ${outBadge(outcome(a))}) · <b>τ₂</b> = <select data-act="cmp"><option value="">choose a run of ${esc(a.task_id)}</option>${cands.map(r => `<option value="${esc(r.key)}" ${S.cmp === r.key ? "selected" : ""}>${esc(runShort(r))} · ${esc(cellLabel(r))} · ${outcome(r)} · ${r.steps} steps · ${seqOf(r)}</option>`).join("")}</select></div>`;
+  const b = S.cmp ? runByKey(S.cmp) : null; if (!b) return h;
+  const sa = seqOf(a), sb = seqOf(b), d = levenshtein(sa, sb);
+  h += `<div class="tiles">${tile(outcome(a) === outcome(b) ? "O(τ₁) = O(τ₂)" : "O(τ₁) ≠ O(τ₂)", "outcome", `${outcome(a)} vs ${outcome(b)}`)}${tile(d, "edit distance between action sequences", `${sa.length} vs ${sb.length} actions · normalised ${fmt(d / Math.max(sa.length, sb.length), 2)}`)}${tile(ints(tokOf(a)) + " / " + ints(tokOf(b)), "tokens τ₁ / τ₂", `${usd(a.cost_usd)} / ${usd(b.cost_usd)}`)}${tile(commonPrefix([sa, sb]).length, "shared prefix length", "actions identical from the start")}</div>`;
+  const pa = predicates(spansOf(a)), pb = predicates(spansOf(b));
+  h += `<div class="row"><div class="col"><div class="card"><h4>τ₁ · ${esc(a.run_id)}</h4>${seqHtml(sa)}<table style="width:100%;margin-top:8px">${pa.map(p => `<tr><td>${esc(p.label)}</td><td>${okBadge(p.ok)}</td><td class="small">${esc(p.note)}</td></tr>`).join("")}</table>${svgTokens(spansOf(a), { w: 420, h: 110 })}</div></div>`;
+  h += `<div class="col"><div class="card"><h4>τ₂ · ${esc(b.run_id)}</h4>${seqHtml(sb)}<table style="width:100%;margin-top:8px">${pb.map(p => `<tr><td>${esc(p.label)}</td><td>${okBadge(p.ok)}</td><td class="small">${esc(p.note)}</td></tr>`).join("")}</table>${svgTokens(spansOf(b), { w: 420, h: 110 })}</div></div></div>`;
+  const diffs = pa.filter((p, i) => p.ok !== pb[i].ok).map(p => p.label);
+  h += `<div class="callout ${diffs.length ? "" : "teal"}">${diffs.length ? "Same task, " + (outcome(a) === outcome(b) ? "same outcome, " : "") + "different conduct: " + diffs.join("; ") + ". The outcome-level oracle cannot see this; a trajectory test can." : "Both trajectories satisfy the same predicates. Compare the sequences and the token totals for what still differs."}</div>`;
+  // side by side ledgers, chat text only
+  const ca = spansOf(a).filter(s => s.span === "chat"), cb = spansOf(b).filter(s => s.span === "chat"); const n = Math.max(ca.length, cb.length);
+  h += `<h4 style="margin-top:14px">Model calls side by side</h4><div class="tbl"><table><tr><th>#</th><th>τ₁</th><th>τ₂</th></tr>${Array.from({ length: n }, (_, i) => `<tr><td class="num">${i}</td><td class="small" style="max-width:520px">${ca[i] ? esc(ca[i].text).slice(0, 220) + (ca[i].calls || []).map(c => ` <span class="mono">→ ${esc(c.name)}</span>`).join("") : ""}</td><td class="small" style="max-width:520px">${cb[i] ? esc(cb[i].text).slice(0, 220) + (cb[i].calls || []).map(c => ` <span class="mono">→ ${esc(c.name)}</span>`).join("") : ""}</td></tr>`).join("")}</table></div>`;
+  return h;
+}
+function trajMulti() {
+  const runs = Array.from(S.multi).map(runByKey).filter(Boolean); if (runs.length < 2) return empty("Select two or more runs (checkboxes in the run list, shift-click on the Board, or 'add to selection' in the viewer).");
+  const key = oracleKey(); const seqs = runs.map(seqOf); const L = Math.max(...seqs.map(s => s.length));
+  let h = `<div class="toolbar"><span class="small">${runs.length} runs selected</span><button class="btn small sec" data-act="multiClear">clear</button></div>`;
+  h += `<div class="tbl"><table><tr><th></th><th>run</th><th>cell · task</th><th>outcome</th><th class="num">steps</th><th class="num">tokens</th><th class="num">cost</th><th>sequence (aligned left)</th><th>fails</th></tr>`;
+  runs.forEach((r, i) => { h += `<tr class="click" data-act="sel" data-key="${esc(r.key)}"><td><button class="btn small sec" data-act="multiToggle" data-key="${esc(r.key)}" title="remove">×</button></td><td class="mono">${esc(runShort(r))}</td><td class="small">${esc(cellLabel(r))} · ${esc(r.task_id)} r${r.repeat_index}</td><td>${outBadge(outcome(r, key))}</td><td class="num">${r.steps}</td><td class="num">${ints(tokOf(r))}</td><td class="num">${usd(r.cost_usd)}</td><td>${seqHtml(seqs[i].padEnd(L, " ").replace(/ /g, "·"))}</td><td>${predBadges(r)}</td></tr>`; });
+  h += `</table></div>`;
+  const labels = runs.map(runShort); const M = runs.map((_, i) => runs.map((_, j) => levenshtein(seqs[i], seqs[j])));
+  h += `<div class="row"><div class="col narrow"><h4>Pairwise edit distance</h4>${heatTable(labels, labels, M, { fmt: v => String(v) })}</div><div class="col"><h4>Predicates across the selection</h4><div class="tbl"><table><tr><th>predicate</th>${runs.map(r => `<th>${esc(runShort(r))}</th>`).join("")}<th class="num">holds</th></tr>${predicates(spansOf(runs[0])).map((p0, pi) => { const vals = runs.map(r => predicates(spansOf(r))[pi].ok); return `<tr><td>${esc(p0.label)}</td>${vals.map(v => `<td>${okBadge(v)}</td>`).join("")}<td class="num">${vals.filter(v => v === true).length}/${vals.filter(v => v !== null).length}</td></tr>`; }).join("")}</table></div></div></div>`;
+  return h;
+}
+
+// ============================================================ 4. Patterns (sets of trajectories)
+function vPatterns() {
+  const R = filtered(), key = oracleKey(); if (!R.length) return `<h2>Patterns</h2>` + empty();
+  const cells = uniq(R.map(cellOf)); const cell = S.patCell && cells.includes(S.patCell) ? S.patCell : "";
+  let rows = cell ? R.filter(r => cellOf(r) === cell) : R; const tasks = uniq(rows.map(r => r.task_id)).sort(); const task = S.patTask && tasks.includes(S.patTask) ? S.patTask : ""; if (task) rows = rows.filter(r => r.task_id === task);
+  const g = graded(rows, key); const pass = g.filter(r => r[key]), fail = g.filter(r => !r[key]);
+  let h = `<h2>Patterns across trajectories</h2><p class="claim">Sets of runs, not one run: which action follows which, when the first edit happens, where runs of the same task diverge, and which shapes of trajectory fail. Everything is over the action alphabet (L list · R read/view · F search · W write · E edit · T run tests · B bash/other · S submit).</p>`;
+  h += `<div class="toolbar"><label class="small">cell <select data-act="patCell"><option value="">all cells in filter</option>${cells.map(c => `<option value="${esc(c)}" ${cell === c ? "selected" : ""}>${esc(c.replace("|", " · "))}</option>`).join("")}</select></label><label class="small">task <select data-act="patTask"><option value="">all tasks</option>${tasks.map(t => `<option ${task === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label><span class="small">${rows.length} runs · ${pass.length} pass · ${fail.length} fail</span></div>`;
+  // 1. sequences
+  const seqGroups = Array.from(by(g, seqOf).entries()).map(([s, rs]) => ({ s, rs, n: rs.length, p: passRate(rs, key), cost: mean(rs.map(r => r.cost_usd || 0)) })).sort((a, b) => b.n - a.n);
+  h += `<h3><span class="n">1</span> Distinct action sequences</h3><div class="row"><div class="col"><div class="tbl"><table><tr><th>sequence</th><th class="num">runs</th><th class="num">pass rate</th><th class="num">Wilson 95%</th><th class="num">mean cost</th><th></th></tr>${seqGroups.slice(0, 25).map(x => { const w = wilson(Math.round(x.p * x.n), x.n); return `<tr><td>${seqHtml(x.s)}</td><td class="num">${x.n}</td><td class="num">${pct(x.p)}</td><td class="num">${ciText(w[0], w[1])}</td><td class="num">${usd(x.cost)}</td><td><button class="btn small sec" data-act="multiSet" data-keys="${esc(x.rs.slice(0, 12).map(r => r.key).join(","))}">select ${Math.min(12, x.n)}</button></td></tr>`; }).join("")}</table></div>${seqGroups.length > 25 ? `<div class="small">${seqGroups.length} distinct sequences; first 25 by count</div>` : ""}</div>`;
+  const fe = (rs) => rs.map(r => featOf(r).first_edit_step).filter(x => x >= 0); const ft = (rs) => rs.map(r => { const t = toolSpans(spansOf(r)); const i = t.findIndex(isTestSpan); return i; }).filter(x => x >= 0);
+  h += `<div class="col narrow"><h4>When does the first edit happen? (step index)</h4><div class="small">passing runs (n=${pass.length})</div>${svgHist(fe(pass), { lo: 0, hi: Math.max(1, ...fe(g)) + 1, bins: 10, color: "#17A398" })}<div class="small">failing runs (n=${fail.length})</div>${svgHist(fe(fail), { lo: 0, hi: Math.max(1, ...fe(g)) + 1, bins: 10, color: "#E4572E" })}<h4 style="margin-top:10px">When is the first test run?</h4><div class="small">passing</div>${svgHist(ft(pass), { lo: 0, hi: Math.max(1, ...ft(g)) + 1, bins: 10, color: "#17A398" })}<div class="small">failing</div>${svgHist(ft(fail), { lo: 0, hi: Math.max(1, ...ft(g)) + 1, bins: 10, color: "#E4572E" })}</div></div>`;
+  // 2. transitions
+  const alpha = "LRFWETBS".split("").filter(a => g.some(r => seqOf(r).includes(a)));
+  const tp = transitions(pass.map(seqOf)), tf = transitions(fail.map(seqOf));
+  const norm = (M) => alpha.map(a => { const tot = sum(alpha.map(b => M[a][b])); return alpha.map(b => tot ? M[a][b] / tot : 0); });
+  const Np = norm(tp), Nf = norm(tf); const Nd = Np.map((row, i) => row.map((v, j) => v - Nf[i][j]));
+  h += `<h3><span class="n">2</span> What follows what: transition probabilities (row → column)</h3><div class="row"><div class="col narrow"><h4>passing runs</h4>${heatTable(alpha, alpha, Np, { fmt: v => v ? pct(v) : "" })}</div><div class="col narrow"><h4>failing runs</h4>${heatTable(alpha, alpha, Nf, { fmt: v => v ? pct(v) : "" })}</div><div class="col narrow"><h4>difference (pass − fail)</h4>${heatTable(alpha, alpha, Nd, { fmt: v => Math.abs(v) < 0.005 ? "" : (v > 0 ? "+" : "") + pct(v), diverging: true, max: Math.max(0.05, ...Nd.flat().map(Math.abs)) })}<div class="small">teal: more common after passing; orange: more common before failing</div></div></div>`;
+  // 3. step-position heatmap
+  const K = Math.min(14, Math.max(...g.map(r => seqOf(r).length), 1)); const pos = (rs) => alpha.map(a => Array.from({ length: K }, (_, k) => rs.length ? rs.filter(r => seqOf(r)[k] === a).length / rs.length : 0));
+  h += `<h3><span class="n">3</span> What happens at step k: share of runs doing each action at position k</h3><div class="row"><div class="col"><h4>passing</h4>${heatTable(alpha, Array.from({ length: K }, (_, k) => String(k)), pos(pass), { fmt: v => v ? pct(v) : "" })}</div><div class="col"><h4>failing</h4>${heatTable(alpha, Array.from({ length: K }, (_, k) => String(k)), pos(fail), { fmt: v => v ? pct(v) : "" })}</div></div>`;
+  // 4. divergence per task
+  h += `<h3><span class="n">4</span> Where runs of the same task diverge</h3><div class="tbl"><table><tr><th>task</th><th class="num">runs</th><th>common prefix</th><th>next action → pass rate (n)</th></tr>`;
+  uniq(g.map(r => r.task_id)).sort().slice(0, 40).forEach(t => { const rs = g.filter(r => r.task_id === t); if (rs.length < 2) return; const seqs = rs.map(seqOf); const pre = commonPrefix(seqs); const branches = Array.from(by(rs, r => seqOf(r)[pre.length] || "∅").entries()).map(([a, v]) => ({ a, n: v.length, p: passRate(v, key) })).sort((x, y) => y.n - x.n); h += `<tr><td><b>${esc(t)}</b></td><td class="num">${rs.length}</td><td>${pre ? seqHtml(pre) : '<span class="small">none</span>'}</td><td>${branches.map(b => `<span class="cellpick" title="${b.n} runs">${b.a === "∅" ? "end" : seqHtml(b.a)} → ${pct(b.p)} <span class="small">(${b.n})</span></span>`).join(" ")}</td></tr>`; });
+  h += `</table></div><p class="small">The prefix is what every run of the task does before the first difference; the branches are the first differing action with the pass rate of the runs that took it. A branch with a low pass rate is a candidate decision to test as a predicate.</p>`;
+  // 5. clustering
+  const sample = g.slice(0, 250); const k = Math.min(S.patK, sample.length);
+  if (sample.length >= 4) { const cl = clusterSequences(sample.map(seqOf), k);
+    h += `<h3><span class="n">5</span> Trajectory clusters (average-linkage on edit distance, ${sample.length} runs${g.length > 250 ? " sampled" : ""})</h3><div class="toolbar"><label class="small">clusters <select data-act="patK">${[2, 3, 4, 5, 6, 8].map(x => `<option ${S.patK === x ? "selected" : ""}>${x}</option>`).join("")}</select></label></div><div class="tbl"><table><tr><th>cluster</th><th class="num">runs</th><th>medoid sequence</th><th class="num">pass rate</th><th class="num">mean steps</th><th class="num">mean cost</th><th class="num">mean distance to medoid</th><th></th></tr>${cl.sort((a, b) => b.members.length - a.members.length).map((c, i) => { const rs = c.members.map(j => sample[j]); return `<tr><td><b>${i + 1}</b></td><td class="num">${rs.length}</td><td>${seqHtml(seqOf(sample[c.medoid]))}</td><td class="num">${pct(passRate(rs, key))}</td><td class="num">${fmt(mean(rs.map(r => r.steps)), 1)}</td><td class="num">${usd(mean(rs.map(r => r.cost_usd || 0)))}</td><td class="num">${fmt(mean(c.members.map(j => c.D[c.medoid][j])), 1)}</td><td><button class="btn small sec" data-act="multiSet" data-keys="${esc(rs.slice(0, 12).map(r => r.key).join(","))}">select ${Math.min(12, rs.length)}</button></td></tr>`; }).join("")}</table></div>`; }
+  return h;
+}
+
+// ============================================================ 5. Queries (trajectory predicates written in the UI)
+const QUERY_EXAMPLES = [
+  { name: "edit never followed by a test", re: "[WE](?!.*T)", note: "an edit with no run_tests anywhere after it" },
+  { name: "submitted without ever testing", re: "^[^T]*S$", note: "the whole run has no T before submit" },
+  { name: "bash before reading anything", re: "^[^R]*B", note: "shell before any read/view" },
+  { name: "three reads in a row", re: "R{3,}", note: "reading without acting" },
+  { name: "test, edit, test (a verify loop)", re: "T[WE]+T", note: "the conduct the prompt asks for" },
+  { name: "no submit", re: "^[^S]*$", note: "the harness ended the run" },
+];
+function queryMatcher(q) {
+  let re = null; try { re = q.re ? new RegExp(q.re) : null; } catch (e) { return { error: e.message }; }
+  const fn = (r) => { const f = featOf(r); if (re && !re.test(seqOf(r))) return false; if (q.steps_min !== "" && r.steps < Number(q.steps_min)) return false; if (q.steps_max !== "" && r.steps > Number(q.steps_max)) return false; if (q.cost_min !== "" && (r.cost_usd || 0) < Number(q.cost_min)) return false; if (q.exit && r.exit_reason !== q.exit) return false; if (q.boundary === "yes" && !(r.boundary_events > 0)) return false; if (q.boundary === "no" && r.boundary_events > 0) return false; if (q.tests_mod === "yes" && !r.tests_modified) return false; if (q.tests_mod === "no" && r.tests_modified) return false; return true; };
+  return { fn };
+}
+function queryAsTest(q) {
+  const cls = (q.name || "query").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "query";
+  const conds = [];
+  if (q.re) conds.push(`re.search(r${JSON.stringify(q.re)}, t.action_string)`);
+  if (q.steps_min !== "") conds.push(`t.summary["steps"] >= ${Number(q.steps_min)}`); if (q.steps_max !== "") conds.push(`t.summary["steps"] <= ${Number(q.steps_max)}`);
+  if (q.cost_min !== "") conds.push(`t.summary["cost_usd"] >= ${Number(q.cost_min)}`); if (q.exit) conds.push(`t.summary["exit_reason"] == ${JSON.stringify(q.exit)}`);
+  if (q.boundary === "yes") conds.push(`t.summary["boundary_events"] > 0`); if (q.boundary === "no") conds.push(`t.summary["boundary_events"] == 0`);
+  if (q.tests_mod === "yes") conds.push(`t.summary["tests_modified"]`); if (q.tests_mod === "no") conds.push(`not t.summary["tests_modified"]`);
+  return `# generated by the console from the query "${q.name || q.re}"\nimport os, re, unittest\nfrom harnesslab.core.trajtest import load_runs\n\nclass Test_${cls}(unittest.TestCase):\n    def matches(self, t):\n        return ${conds.join(" and ") || "True"}\n\n    def test_policy_no_run_matches(self):\n        """Gate: fail on any run that matches (use when the pattern is an incident)."""\n        for t in load_runs(os.environ.get("AGENTLAB_RESULTS", "data/runs/live")):\n            with self.subTest(run=t.run_id, seq=t.action_string):\n                self.assertFalse(self.matches(t))\n\n    def test_metric_rate_below_threshold(self):\n        """Metric: the rate of matching runs, with a threshold you set in advance."""\n        runs = load_runs(os.environ.get("AGENTLAB_RESULTS", "data/runs/live"))\n        rate = sum(self.matches(t) for t in runs) / max(1, len(runs))\n        self.assertLessEqual(rate, 0.20, f"{rate:.2f} of {len(runs)} runs match")\n`;
+}
+function vQueries() {
+  const R = filtered(), key = oracleKey(); const q = S.q;
+  let h = `<h2>Trajectory queries</h2><p class="claim">Write a predicate over the action string and the run fields, see which runs match, and compare pass rates inside and outside the match. A query that separates failures from successes is a hypothesis; the export turns it into a unittest you can run on any results directory.</p>`;
+  h += `<div class="card"><div class="form"><label>name<input data-q="name" value="${esc(q.name)}" placeholder="what the pattern means"></label><label>regex over the action string<input data-q="re" value="${esc(q.re)}" placeholder="e.g. [WE](?!.*T)" class="mono"></label><label>steps ≥<input data-q="steps_min" type="number" value="${esc(q.steps_min)}"></label><label>steps ≤<input data-q="steps_max" type="number" value="${esc(q.steps_max)}"></label><label>cost ≥<input data-q="cost_min" type="number" step="0.001" value="${esc(q.cost_min)}"></label><label>exit reason<select data-q="exit"><option value="">any</option>${uniq(R.map(r => r.exit_reason)).map(e => `<option ${q.exit === e ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></label><label>boundary event<select data-q="boundary"><option value="">any</option><option value="yes" ${q.boundary === "yes" ? "selected" : ""}>yes</option><option value="no" ${q.boundary === "no" ? "selected" : ""}>no</option></select></label><label>tests modified<select data-q="tests_mod"><option value="">any</option><option value="yes" ${q.tests_mod === "yes" ? "selected" : ""}>yes</option><option value="no" ${q.tests_mod === "no" ? "selected" : ""}>no</option></select></label><span><button class="btn" data-act="qsave">save query</button> <button class="btn sec" data-act="qexport">export as unittest</button></span></div>
+  <div class="small" style="margin-top:8px">Examples: ${QUERY_EXAMPLES.map(e => `<span class="cellpick" data-act="qex" data-re="${esc(e.re)}" data-name="${esc(e.name)}" title="${esc(e.note)}"><span class="mono">${esc(e.re)}</span> ${esc(e.name)}</span>`).join(" ")}</div></div>`;
+  const m = queryMatcher(q); if (m.error) return h + `<div class="callout">regex error: ${esc(m.error)}</div>`;
+  const st = predicateStats(R, m.fn, key); const rrTxt = Number.isFinite(st.rr.rr) ? `${fmt(st.rr.rr, 2)} ${Number.isFinite(st.rr.lo) ? ciText(st.rr.lo, st.rr.hi) : ""}` : "n/a";
+  const active = q.re || q.steps_min !== "" || q.steps_max !== "" || q.cost_min !== "" || q.exit || q.boundary || q.tests_mod;
+  if (active) {
+    h += `<div class="tiles">${tile(`${st.matches.length} / ${st.n}`, "runs matching", pct(st.matches.length / (st.n || 1)) + " of graded runs")}${tile(pct(st.passIn), "pass rate inside the match", `${st.b} pass · ${st.a} fail`)}${tile(pct(st.passOut), "pass rate outside", `${st.d} pass · ${st.c} fail`)}${tile(fmt(st.ochiai, 3), "Ochiai (as a failure feature)", "e_f / √(F·(e_f+e_p))")}${tile(rrTxt, "risk ratio of failing, matched vs not", "with 95% interval")}</div>`;
+    h += `<div class="callout ${Number.isFinite(st.rr.lo) && st.rr.lo > 1 ? "" : "teal"}">${Number.isFinite(st.rr.lo) && st.rr.lo > 1 ? "Runs that match fail more often, and the interval excludes 1. That is a hypothesis about conduct worth a controlled comparison, not yet a cause." : (Number.isFinite(st.rr.hi) && st.rr.hi < 1 ? "Runs that match fail less often; the pattern looks like conduct that helps." : "No separation the interval can support at this n.")}</div>`;
+    h += `<div class="toolbar"><span class="small">${Math.min(60, st.matches.length)} of ${st.matches.length} matches</span>${st.matches.length ? `<button class="btn small sec" data-act="multiSet" data-keys="${esc(st.matches.slice(0, 12).map(r => r.key).join(","))}">compare first 12</button>` : ""}</div><div class="tbl"><table><tr><th>run</th><th>task</th><th>cell</th><th>outcome</th><th class="num">steps</th><th class="num">cost</th><th>sequence</th><th>exit</th></tr>${st.matches.slice(0, 60).map(r => `<tr class="click" data-act="sel" data-key="${esc(r.key)}"><td class="mono">${esc(runShort(r))}</td><td>${esc(r.task_id)}</td><td class="small">${esc(cellLabel(r))}</td><td>${outBadge(outcome(r, key))}</td><td class="num">${r.steps}</td><td class="num">${usd(r.cost_usd)}</td><td>${seqHtml(seqOf(r))}</td><td class="small">${esc(r.exit_reason)}</td></tr>`).join("")}</table></div>`;
+  } else h += `<p class="small">Type a regex or a field filter above, or click an example.</p>`;
+  if (S.qOpen) h += `<div class="card"><h4>Generated trajectory test <button class="btn small sec" data-act="qclose">close</button></h4><pre style="white-space:pre-wrap;background:var(--code);color:var(--codeink);padding:8px;border-radius:4px;font-size:11.5px">${esc(S.qOpen)}</pre><p class="small">Save as trajectory_tests/test_query.py and run <code>AGENTLAB_RESULTS=data/runs/live python -m unittest trajectory_tests/test_query.py</code>. Decide which of the two methods is your test: the gate or the rate.</p></div>`;
+  if (S.qSaved.length) { h += `<h3><span class="n">★</span> Saved queries (this browser)</h3><div class="tbl"><table><tr><th>name</th><th>regex</th><th class="num">matches</th><th class="num">pass in</th><th class="num">pass out</th><th class="num">Ochiai</th><th class="num">risk ratio</th><th></th></tr>${S.qSaved.map((sq, i) => { const mm = queryMatcher(sq); const s2 = mm.fn ? predicateStats(R, mm.fn, key) : null; return `<tr><td><b>${esc(sq.name || "(unnamed)")}</b></td><td class="mono">${esc(sq.re)}</td><td class="num">${s2 ? s2.matches.length : "?"}</td><td class="num">${s2 ? pct(s2.passIn) : ""}</td><td class="num">${s2 ? pct(s2.passOut) : ""}</td><td class="num">${s2 ? fmt(s2.ochiai, 3) : ""}</td><td class="num">${s2 && Number.isFinite(s2.rr.rr) ? fmt(s2.rr.rr, 2) : ""}</td><td><button class="btn small sec" data-act="qload" data-i="${i}">load</button> <button class="btn small sec" data-act="qdel" data-i="${i}">delete</button></td></tr>`; }).join("")}</table></div>`; }
+  return h;
+}
+
+// ---- views_c.js
+// ============================================================ 6. Distribution
+function vDist() {
+  const R = filtered(), key = oracleKey(); const G = graded(R, key); if (!G.length) return `<h2>Distribution</h2>` + empty("No graded runs under this oracle in the filter.");
+  let h = `<h2>Non-determinism is statistics</h2><p class="claim">X<sub>ij</sub> ~ Bernoulli(p<sub>i</sub>). One run estimates p with n = 1. The interval tells you what one run is worth; pass@k and pass^k are two different questions asked of the same repeats.</p>`;
+  const tt = taskTable(R, key), tasks = Object.keys(tt), maxn = Math.max(...tasks.map(t => tt[t].n));
+  h += `<h3><span class="n">1</span> Per task</h3><div class="tbl"><table><tr><th>task</th><th class="num">n</th><th class="num">c</th><th class="num">p̂</th><th class="num">Wilson 95%</th><th class="num">Wald 95%</th>${[2, 3, 5, 10].filter(k => k <= maxn).map(k => `<th class="num">pass@${k}</th><th class="num">pass^${k}</th>`).join("")}<th>probe</th></tr>`;
+  tasks.slice(0, 60).forEach(t => { const v = tt[t], w = wilson(v.c, v.n), wd = wald(v.c, v.n); h += `<tr><td><b>${esc(t)}</b></td><td class="num">${v.n}</td><td class="num">${v.c}</td><td class="num">${fmt(v.p)}</td><td class="num">${ciText(w[0], w[1])}</td><td class="num">${ciText(wd[0], wd[1])}</td>${[2, 3, 5, 10].filter(k => k <= maxn).map(k => `<td class="num">${k <= v.n ? fmt(passAtK(v.c, v.n, k)) : ""}</td><td class="num">${k <= v.n ? fmt(passPowK(v.c, v.n, k)) : ""}</td>`).join("")}<td class="small">${esc((B.tasks[t] || {}).probe || "")}</td></tr>`; });
+  h += `</table></div><p class="small">Wald collapses to a point at p̂ = 0 or 1; Wilson does not. That is the interval that belongs in a paper.${tasks.length > 60 ? ` First 60 of ${tasks.length} tasks.` : ""}</p>`;
+  const hids = uniq(R.map(r => r.harness_id)).slice(0, 8); const ks = Array.from({ length: Math.min(maxn, 20) }, (_, i) => i + 1);
+  const sAt = [], sPow = [];
+  hids.forEach((hid, i) => { const rs = R.filter(r => r.harness_id === hid); const t2 = taskTable(rs, key); const ts2 = Object.keys(t2); if (!ts2.length) return; const n2 = Math.min(...ts2.map(t => t2[t].n)); const kk = ks.filter(k => k <= n2); if (!kk.length) return; sAt.push({ name: hid, color: SERIES[i], points: kk.map(k => [k, mean(ts2.map(t => passAtK(t2[t].c, t2[t].n, k)))]) }); sPow.push({ name: hid, color: SERIES[i], points: kk.map(k => [k, mean(ts2.map(t => passPowK(t2[t].c, t2[t].n, k)))]) }); });
+  if (sAt.length) h += `<h3><span class="n">2</span> pass@k rises, pass^k falls</h3><div class="row"><div class="col">${svgLines(sAt, { xlabel: "k", ymax: 1, xticks: ks })}<div class="small">pass@k: at least one of k runs passes (best case, lenient)</div></div><div class="col">${svgLines(sPow, { xlabel: "k", ymax: 1, xticks: ks })}<div class="small">pass^k: all k runs pass (consistency, what a user experiences)</div></div></div>`;
+  // bootstrap distribution + drift
+  const [lo, hi, boots] = bootstrapCI(tasks.map(t => tt[t].p), 2000, 7); const byRep = Array.from(by(G, r => r.repeat_index).entries()).sort((a, b) => a[0] - b[0]);
+  h += `<h3><span class="n">3</span> The interval, drawn, and a drift check</h3><div class="row"><div class="col narrow"><h4>Task-bootstrap distribution of pass@1</h4>${svgHist(boots, { lo: 0, hi: 1, bins: 25, d: 2, mark: mean(tasks.map(t => tt[t].p)), w: 360, h: 140 })}<div class="small">2,000 resamples of the ${tasks.length} task means; 95% ${ciText(lo, hi)}. The red line is the point estimate.</div></div><div class="col narrow"><h4>Pass rate by repeat index</h4>${svgLines([{ name: "pass rate", color: "#3B6FD9", points: byRep.map(([k, v]) => [k, passRate(v, key)]), band: byRep.map(([k, v]) => { const g = graded(v, key); const w = wilson(g.filter(r => r[key]).length, g.length); return [k, w[0], w[1]]; }) }], { xlabel: "repeat index", ymax: 1, w: 380, h: 200, xticks: byRep.map(([k]) => k), hline: passRate(G, key) })}<div class="small">If the API drifted or the sandbox leaked state between repeats, this is where it shows. Flat around the dashed mean is what you want.</div></div>`;
+  const hAll = uniq(R.map(r => r.harness_id)), mAll = uniq(R.map(r => r.model));
+  h += `<div class="col"><h4>Flip map (c/n per task and cell)</h4><div class="tbl"><table><tr><th>task</th>${mAll.flatMap(m => hAll.map(hid => `<th>${esc(m)}<br>${esc(hid)}</th>`)).join("")}</tr>${tasks.slice(0, 40).map(t => `<tr><td><b>${esc(t)}</b></td>${mAll.flatMap(m => hAll.map(hid => { const rs = graded(R.filter(r => r.task_id === t && r.harness_id === hid && r.model === m), key); if (!rs.length) return `<td class="small">—</td>`; const c = rs.filter(r => r[key]).length, n = rs.length; const bg = c === n ? "var(--ok-bg)" : (c === 0 ? "var(--bad-bg)" : "var(--warn-bg)"); return `<td style="background:${bg};text-align:center">${c}/${n}</td>`; })).join("")}</tr>`).join("")}</table></div><div class="legend"><span><i style="background:var(--ok-bg)"></i>always passes</span><span><i style="background:var(--bad-bg)"></i>never passes</span><span><i style="background:var(--warn-bg)"></i>mixed: the cell has a distribution, not a value</span></div></div></div>`;
+  h += `<h3><span class="n">4</span> Path diversity within a cell</h3><div class="tbl"><table><tr><th>cell × task</th><th class="num">runs</th><th class="num">distinct sequences</th><th class="num">mean pairwise edit distance</th><th class="num">identical pairs</th><th class="num">steps min–max</th><th class="num">tokens min–max</th></tr>`;
+  const grp = by(R, r => `${r.model} × ${r.harness_id} × ${r.task_id}`); let shown = 0; const grpRows = Array.from(grp.entries()).filter(([, rs]) => rs.length >= 2);
+  grpRows.forEach(([g, rs]) => { if (shown++ >= 24) return; const seqs = rs.map(seqOf); let dsum = 0, same = 0, pairs = 0; for (let i = 0; i < seqs.length; i++) for (let j = i + 1; j < seqs.length; j++) { const d = levenshtein(seqs[i], seqs[j]); dsum += d; pairs++; if (!d) same++; } const toks = rs.map(tokOf);
+    h += `<tr><td>${esc(g)}</td><td class="num">${rs.length}</td><td class="num">${uniq(seqs).length}</td><td class="num">${fmt(dsum / (pairs || 1), 1)}</td><td class="num">${pct(same / (pairs || 1))}</td><td class="num">${Math.min(...rs.map(r => r.steps))}–${Math.max(...rs.map(r => r.steps))}</td><td class="num">${ints(Math.min(...toks))}–${ints(Math.max(...toks))}</td></tr>`; });
+  h += `</table></div>${grpRows.length > 24 ? `<p class="small">first 24 of ${grpRows.length} cell × task groups; narrow the filter to see the rest.</p>` : ""}`;
+  const pass = G.filter(r => r[key]).map(r => r.steps), fail = G.filter(r => !r[key]).map(r => r.steps);
+  h += `<h3><span class="n">5</span> Steps by outcome, and how runs end</h3><div class="row"><div class="col narrow"><div class="small">steps, passing runs (n=${pass.length})</div>${svgHist(pass, { lo: 0, hi: Math.max(...R.map(r => r.steps)) + 1, color: "#17A398" })}<div class="small">steps, failing runs (n=${fail.length})</div>${svgHist(fail, { lo: 0, hi: Math.max(...R.map(r => r.steps)) + 1, color: "#E4572E" })}</div><div class="col">${svgBar(exitMix(R).map(([k, v]) => ({ label: k, value: v, text: pct(v, 1), color: k === "submitted" ? "#17A398" : "#9CA3AF" })), { max: 1 })}<div class="small">exit reasons: everything that is not "submitted" is an UNRESOLVED run, ended by the harness</div></div></div>`;
+  return h;
+}
+
+// ============================================================ 7. Attribution
+function vAttr() {
+  const R = filtered(), key = oracleKey(); const G = graded(R, key); if (!G.length) return `<h2>Attribution</h2>` + empty("No graded runs under this oracle.");
+  const rows = attribution(R, key).sort((a, b) => b[S.sortAttr] - a[S.sortAttr]);
+  const F = G.filter(r => !r[key]).length;
+  let h = `<h2>Spectrum-based attribution over trajectories</h2><p class="claim">Rows are runs, columns are binary trajectory features, "failing" is the oracle saying no. susp(f) = e<sub>f</sub> / √(F · (e<sub>f</sub> + e<sub>p</sub>)), the Ochiai formula fault localisation uses on statements. Read both rate columns: a feature common in failures and successes ranks high from base rate alone. Correlation, not cause.</p>`;
+  h += `<div class="card"><div class="form"><label>steps ><input type="number" data-act="thr" data-k="steps" value="${S.thr.steps}"></label><label>repeated calls ><input type="number" data-act="thr" data-k="repeated" value="${S.thr.repeated}"></label><label>patch lines ><input type="number" data-act="thr" data-k="lines" value="${S.thr.lines}"></label><label>files edited ><input type="number" data-act="thr" data-k="files" value="${S.thr.files}"></label><label>first edit after step<input type="number" data-act="thr" data-k="first_edit" value="${S.thr.first_edit}"></label><label>sort by<select data-act="sortAttr"><option value="ochiai" ${S.sortAttr === "ochiai" ? "selected" : ""}>Ochiai</option><option value="tarantula" ${S.sortAttr === "tarantula" ? "selected" : ""}>Tarantula</option><option value="rf" ${S.sortAttr === "rf" ? "selected" : ""}>rate in failures</option></select></label></div><div class="small" style="margin-top:6px">${G.length} graded runs · ${F} failing (F) · ${G.length - F} passing (P). Thresholds are yours to argue about; the ranking is only as meaningful as the features. Write your own feature as a query in the Queries view.</div></div>`;
+  h += `<div class="tbl"><table><tr><th>feature</th><th class="num">e<sub>f</sub></th><th class="num">e<sub>p</sub></th><th class="num">rate in failures</th><th class="num">rate in successes</th><th class="num">Ochiai</th><th class="num">Tarantula</th><th class="num">risk ratio</th><th></th></tr>`;
+  rows.forEach(f => { const rr = riskRatio(f.ef, f.ep, F - f.ef, (G.length - F) - f.ep); h += `<tr class="click" data-act="attrOpen" data-id="${esc(f.id)}"><td><b>${esc(f.id)}</b><div class="small">${esc(f.label)}</div></td><td class="num">${f.ef}</td><td class="num">${f.ep}</td><td class="num">${pct(f.rf)}</td><td class="num">${pct(f.rp)}</td><td class="num"><b>${fmt(f.ochiai, 3)}</b></td><td class="num">${fmt(f.tarantula, 3)}</td><td class="num">${Number.isFinite(rr.rr) ? fmt(rr.rr, 2) : "n/a"}${Number.isFinite(rr.lo) ? `<div class="small">${ciText(rr.lo, rr.hi, 1)}</div>` : ""}</td><td class="small">${f.carriers.length} runs ${S.attrOpen === f.id ? "▾" : "▸"}</td></tr>`;
+    if (S.attrOpen === f.id) { h += `<tr><td colspan="9" style="background:var(--card2)"><div class="toolbar"><span class="small">runs carrying this feature</span>${f.carriers.length ? `<button class="btn small sec" data-act="multiSet" data-keys="${esc(f.carriers.slice(0, 12).map(r => r.key).join(","))}">compare first 12</button>` : ""}</div><div class="row">${f.carriers.slice(0, 60).map(r => `<span class="cellpick" data-act="sel" data-key="${esc(r.key)}">${esc(runShort(r))} ${esc(r.task_id)} ${esc(r.harness_id)} ${outBadge(outcome(r, key))}</span>`).join("")}${f.carriers.length > 60 ? `<span class="small">… ${f.carriers.length - 60} more</span>` : ""}</div></td></tr>`; } });
+  h += `</table></div>`;
+  const top = rows[0];
+  if (top) h += `<div class="callout">Top feature: <b>${esc(top.id)}</b>, present in ${pct(top.rf)} of failures and ${pct(top.rp)} of successes. Before calling it a cause, ask: is it a symptom of failing (a run that cannot find the bug keeps looping), a cause (skipping verification lets a wrong patch through), or a harness artefact (a step cap that ends every long run the same way)? The separating experiment is a harness change with the same model.</div>`;
+  // per-cell breakdown of the top 4 features
+  const cells = uniq(R.map(cellOf)); if (cells.length > 1) { const top4 = rows.slice(0, 4); h += `<h3><span class="n">2</span> Feature rate by cell (does the feature travel with the harness?)</h3><div class="tbl"><table><tr><th>cell</th><th class="num">runs</th><th class="num">pass</th>${top4.map(f => `<th class="num">${esc(f.id)}</th>`).join("")}</tr>${cells.map(c => { const rs = G.filter(r => cellOf(r) === c); const defs = featureDefs(); return `<tr><td><b>${esc(c.replace("|", " · "))}</b></td><td class="num">${rs.length}</td><td class="num">${pct(passRate(rs, key))}</td>${top4.map(f => { const d = defs.find(x => x[0] === f.id); return `<td class="num">${pct(mean(rs.map(r => d[2](featOf(r)) ? 1 : 0)))}</td>`; }).join("")}</tr>`; }).join("")}</table></div><p class="small">A feature whose rate changes with the harness at a fixed model is a harness artefact or a harness effect; one that stays put across harnesses belongs to the model or the tasks.</p>`; }
+  return h;
+}
+
+// ============================================================ 8. Telemetry
+function vTele() {
+  const R = filtered(), key = oracleKey(); if (!R.length) return `<h2>Telemetry</h2>` + empty();
+  let h = `<h2>Telemetry: the ledger is the instrument</h2><p class="claim">Every number here comes from spans that use OpenTelemetry GenAI attribute names, so what you learn in the lab maps onto production traces. Cost is the endpoint's reported charge where available (OpenRouter) and tokens × price otherwise; the conventions carry no cost attribute.</p>`;
+  const groups = groupsOf(R); const ref = Array.from(groups.keys()).find(k => k.endsWith("|baseline")) || Array.from(groups.keys())[0];
+  const refCop = costOfPass(groups.get(ref), key);
+  h += `<div class="tbl"><table><tr><th>cell (results · model · harness)</th><th class="num">runs</th><th class="num">pass@1</th><th class="num">tok/run</th><th class="num">p95 tok/run</th><th class="num">tok/solve</th><th class="num">$/run</th><th class="num">cost of pass</th><th class="num">agency tax vs ${esc(ref.split("|").slice(1).join(" · "))}</th><th class="num">model ms/run</th><th class="num">calls/run</th><th class="num">in:out</th></tr>`;
+  Array.from(groups.entries()).forEach(([gk, rs]) => { const toks = rs.map(tokOf).sort((a, b) => a - b); const p95 = toks[Math.min(toks.length - 1, Math.floor(0.95 * toks.length))]; const cop = costOfPass(rs, key); const inn = sum(rs.map(r => r.input_tokens || 0)), out = sum(rs.map(r => r.output_tokens || 0));
+    h += `<tr class="click" data-act="cellsel" data-key="${esc(gk)}"><td>${esc(gk.split("|").join(" · "))}</td><td class="num">${rs.length}</td><td class="num">${pct(passRate(rs, key), 1)}</td><td class="num">${ints(mean(toks))}</td><td class="num">${ints(p95)}</td><td class="num">${ints(tokensPerSolve(rs, key))}</td><td class="num">${usd(mean(rs.map(r => r.cost_usd || 0)))}</td><td class="num"><b>${usd(cop)}</b></td><td class="num">${Number.isFinite(cop) && Number.isFinite(refCop) && refCop ? fmt(cop / refCop, 2) + "×" : "n/a"}</td><td class="num">${ints(mean(rs.map(latencyOf)))}</td><td class="num">${fmt(mean(rs.map(r => r.steps)), 1)}</td><td class="num">${out ? fmt(inn / out, 0) + ":1" : "n/a"}</td></tr>`; });
+  h += `</table></div>`;
+  const cells = Array.from(groups.entries()).map(([k, rs], i) => { const n = graded(rs, key).length, p = passRate(rs, key); return { key: k, label: k.split("|").slice(1).join(" · "), x: costOfPass(rs, key), y: p, err: wilson(Math.round(p * n), n), color: SERIES[i % SERIES.length], title: `${k.split("|").join(" · ")}: pass ${pct(p, 1)} · ${usd(costOfPass(rs, key))} per pass`, act: "cellsel" }; });
+  h += `<div class="row"><div class="col">${svgScatter(cells, { xlog: true, xlabel: "cost of pass (USD, log)", ylabel: "pass rate", ymax: 1, frontier: true, xfmt: x => usd(x), yfmt: y => pct(y), w: 480, h: 280 })}<div class="small">Cost of pass = mean cost per run ÷ pass rate: what a correct answer costs once failures are paid for. Cells above and to the left of the dashed frontier do not exist; cells below it are dominated.</div></div>`;
+  h += `<div class="col">${svgBar(Array.from(groups.entries()).map(([gk, rs]) => ({ label: gk.split("|").slice(1).join(" · "), value: Math.min(tokensPerSolve(rs, key), 1e9), text: ints(tokensPerSolve(rs, key)) })), { w: 480, lw: 210, color: "#3B6FD9" })}<div class="small">tokens per solved task: the column Vats & Golev found to spread 40× across harnesses at equal pass rate</div></div></div>`;
+  // per task cost
+  const tasks = uniq(R.map(r => r.task_id)).sort().slice(0, 40);
+  h += `<h3><span class="n">2</span> Where the money goes, per task</h3><div class="tbl"><table><tr><th>task</th><th class="num">runs</th><th class="num">pass</th><th class="num">mean tokens</th><th class="num">mean cost</th><th class="num">cost of pass</th><th class="num">mean steps</th><th class="num">share of spend</th></tr>${tasks.map(t => { const rs = R.filter(r => r.task_id === t); return `<tr><td><b>${esc(t)}</b></td><td class="num">${rs.length}</td><td class="num">${pct(passRate(rs, key))}</td><td class="num">${ints(mean(rs.map(tokOf)))}</td><td class="num">${usd(mean(rs.map(r => r.cost_usd || 0)))}</td><td class="num">${usd(costOfPass(rs, key))}</td><td class="num">${fmt(mean(rs.map(r => r.steps)), 1)}</td><td class="num">${pct(sum(rs.map(r => r.cost_usd || 0)) / (sum(R.map(r => r.cost_usd || 0)) || 1))}</td></tr>`; }).join("")}</table></div>`;
+  const sel = S.sel ? runByKey(S.sel) : R[0];
+  h += `<div class="row"><div class="col"><h3><span class="n">3</span> Cost accumulation for one run (${esc(sel.run_id)}, ${esc(cellLabel(sel))})</h3>${svgTokens(spansOf(sel), { w: 640, h: 140 })}<p class="small">Input tokens grow with the transcript: each call re-sends the history the harness keeps. A context-management rule (C in H) changes this curve directly.</p></div>`;
+  h += `<div class="col narrow"><h3><span class="n">4</span> Attribute names in the ledger</h3><div class="card"><table style="width:100%"><tr><th>span</th><th>attributes</th></tr><tr><td>invoke_agent</td><td class="mono">harness (full config), exit_reason, total_tokens, cost_usd</td></tr><tr><td>chat</td><td class="mono">gen_ai.operation.name, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, gen_ai.response.finish_reasons, duration_ms, cost_usd</td></tr><tr><td>execute_tool</td><td class="mono">gen_ai.tool.name, args, status, duration_ms, result_preview, kind (imported runs)</td></tr><tr><td>edit</td><td class="mono">path, lines_added, lines_removed, tool</td></tr><tr><td>boundary_event</td><td class="mono">kind, tool, args, status (blocked | allowed)</td></tr><tr><td>grade</td><td class="mono">visible, hidden, strong, tests_modified</td></tr></table></div></div></div>`;
+  return h;
+}
+
+// ============================================================ 9. Integrity
+function vInteg() {
+  const R = filtered(); if (!R.length) return `<h2>Integrity</h2>` + empty();
+  let h = `<h2>Passing is not correct</h2><p class="claim">Three oracles graded the same final workspaces: the visible tests the agent saw, the hidden suite, and a strengthened suite. The disagreements are the measurement error of the benchmark, and they are not symmetric across harnesses.</p>`;
+  const withV = R.filter(r => r.visible_pass != null), withH = R.filter(r => r.hidden_pass != null), withS = R.filter(r => r.strong_pass != null);
+  h += `<div class="tiles">${tile(pct(passRate(R, "visible_pass"), 1), "pass rate, visible tests (self-report)", `what the agent could check · n=${withV.length}`)}${tile(pct(passRate(R, "hidden_pass"), 1), "pass rate, hidden tests", `the benchmark's oracle · n=${withH.length}`)}${tile(pct(passRate(R, "strong_pass"), 1), "pass rate, strengthened tests", `hidden + augmented · n=${withS.length}`)}${tile(pct(mean(R.map(r => r.tests_modified ? 1 : 0)), 1), "runs that modified tests", "oracle tampering, blocked or not")}</div>`;
+  const conf = (ka, kb, la, lb) => { const rs = R.filter(r => r[ka] != null && r[kb] != null); if (!rs.length) return `<div class="card"><h4>${esc(la)} vs ${esc(lb)}</h4><div class="small">no runs graded by both</div></div>`; const c = { tt: 0, tf: 0, ft: 0, ff: 0 }; rs.forEach(r => { c[(r[ka] ? "t" : "f") + (r[kb] ? "t" : "f")]++; }); const n = rs.length; const sens = c.tt + c.ft ? c.tt / (c.tt + c.ft) : NaN, spec = c.tf + c.ff ? c.ff / (c.tf + c.ff) : NaN; return `<div class="card"><h4>${esc(la)} vs ${esc(lb)}</h4><table><tr><th></th><th>${esc(lb)} ✔</th><th>${esc(lb)} ✘</th></tr><tr><td>${esc(la)} ✔</td><td class="num" style="background:var(--ok-bg)">${c.tt}</td><td class="num" style="background:var(--bad-bg)"><b>${c.tf}</b></td></tr><tr><td>${esc(la)} ✘</td><td class="num" style="background:var(--warn-bg)">${c.ft}</td><td class="num">${c.ff}</td></tr></table><div class="small" style="margin-top:6px">treating ${esc(lb)} as truth: sensitivity of ${esc(la)} = ${fmt(sens)}, specificity = ${fmt(spec)} · κ = ${fmt(kappa(rs.map(r => !!r[ka]), rs.map(r => !!r[kb])))} · ${pct(c.tf / n, 1)} of runs are "${esc(la)} passes, ${esc(lb)} fails"</div></div>`; };
+  h += `<div class="row"><div class="col">${conf("visible_pass", "hidden_pass", "visible", "hidden")}</div><div class="col">${conf("hidden_pass", "strong_pass", "hidden", "strengthened")}</div></div>`;
+  const hids = uniq(R.map(r => r.harness_id));
+  if (hids.length > 1) {
+    const tab = hids.map(hid => { const rs = R.filter(r => r.harness_id === hid); return { hid, v: passRate(rs, "visible_pass"), h: passRate(rs, "hidden_pass"), s: passRate(rs, "strong_pass"), n: rs.length }; });
+    const rank = (k) => { const o = tab.filter(x => Number.isFinite(x[k])).sort((a, b) => b[k] - a[k]); return Object.fromEntries(o.map((x, i) => [x.hid, i + 1])); }; const rv = rank("v"), rh = rank("h"), rsn = rank("s");
+    h += `<h3><span class="n">2</span> Does the ranking survive a stronger oracle?</h3><div class="tbl"><table><tr><th>harness</th><th class="num">n</th><th class="num">visible</th><th class="num">rank</th><th class="num">hidden</th><th class="num">rank</th><th class="num">strengthened</th><th class="num">rank</th><th class="num">lost hidden → strong</th></tr>${tab.map(x => `<tr><td><b>${esc(x.hid)}</b></td><td class="num">${x.n}</td><td class="num">${pct(x.v, 1)}</td><td class="num">${rv[x.hid] || ""}</td><td class="num">${pct(x.h, 1)}</td><td class="num">${rh[x.hid] || ""}</td><td class="num">${pct(x.s, 1)}</td><td class="num">${rsn[x.hid] && rsn[x.hid] !== rh[x.hid] ? `<b style="color:var(--signal)">${rsn[x.hid]}</b>` : (rsn[x.hid] || "")}</td><td class="num">${Number.isFinite(x.s) ? pct(x.h - x.s, 1) : ""}</td></tr>`).join("")}</table></div>`;
+  }
+  const leaky = Object.values(B.tasks).filter(t => t.probe && t.probe !== "none");
+  if (leaky.length) {
+    h += `<h3><span class="n">3</span> Task probes</h3><div class="tbl"><table><tr><th>task</th><th>probe</th><th class="num">pass@1</th><th class="num">mean steps</th><th class="num">mean tokens</th><th class="num">mean patch bytes</th><th>others (mean)</th></tr>`;
+    const others = R.filter(r => !leaky.some(t => t.id === r.task_id));
+    leaky.forEach(t => { const rs = R.filter(r => r.task_id === t.id); if (!rs.length) return; h += `<tr><td><b>${esc(t.id)}</b><div class="small">${esc(t.title)}</div></td><td>${esc(t.probe)}</td><td class="num">${pct(passRate(rs, "hidden_pass"))}</td><td class="num">${fmt(mean(rs.map(r => r.steps)), 1)}</td><td class="num">${ints(mean(rs.map(tokOf)))}</td><td class="num">${ints(mean(rs.map(r => r.patch_bytes)))}</td><td class="small">pass ${pct(passRate(others, "hidden_pass"))} · steps ${fmt(mean(others.map(r => r.steps)), 1)} · tokens ${ints(mean(others.map(tokOf)))}</td></tr>`; });
+    h += `</table></div><p class="small">solution_leak: the fix is in the issue text (SWE-bench+ found 32.67% of passed patches with the solution in the issue or comments). injected: the issue carries an instruction the agent should not follow. ambiguous: the issue underspecifies the behaviour, so a passing patch is one reading of it.</p>`;
+  }
+  if (B.judge && B.judge.length) {
+    h += `<h3><span class="n">4</span> Judge calibration (exercise 4, saved by the script)</h3><div class="tbl"><table><tr><th>judge</th><th class="num">items</th><th class="num">repeats</th><th class="num">raw agreement</th><th class="num">κ</th><th class="num">test-retest</th><th class="num">P(pick A) first / after swap</th><th class="num">position-consistent</th><th class="num">judged-correct length / judged-incorrect</th><th>when</th></tr>${B.judge.map(j => `<tr><td><b>${esc(j.judge)}:${esc(j.model)}</b></td><td class="num">${j.n}</td><td class="num">${j.repeats}</td><td class="num">${pct(j.agreement, 1)}</td><td class="num"><b>${fmt(j.kappa, 2)}</b></td><td class="num">${pct(j.test_retest, 1)}</td><td class="num">${j.pairwise ? fmt(j.pairwise.p_pick_A_first, 2) + " / " + fmt(j.pairwise.p_pick_A_after_swap, 2) : "n/a"}</td><td class="num">${j.pairwise ? pct(j.pairwise.position_consistent) : "n/a"}</td><td class="num">${ints(j.mean_len_judged_correct)} / ${ints(j.mean_len_judged_incorrect)}</td><td class="small">${esc(j.generated_at)}</td></tr>`).join("")}</table></div><p class="small">Agreement minus chance is κ. A judge can be perfectly repeatable and still biased (P(pick A) far from 0.5 after the swap): the consistency-bias paradox.</p>`;
+  }
+  return h;
+}
+
+// ============================================================ 10. Experiment
+const FACTORS = { model: "model", harness_id: "harness", results: "results dir", task_id: "task" };
+function vExp() {
+  const R = filtered(), key = oracleKey(); const G = graded(R, key); if (!G.length) return `<h2>Experiment</h2>` + empty("No graded runs under this oracle.");
+  const fa = S.expFA, fb = S.expFB; const A = uniq(G.map(r => r[fa])), Bv = uniq(G.map(r => r[fb])).slice(0, 10);
+  let h = `<h2>From benchmark to experiment</h2><p class="claim">Y<sub>ijk</sub> = μ + α<sub>i</sub> + β<sub>j</sub> + (αβ)<sub>ij</sub> + u<sub>k</sub><sup>task</sup> + ε<sub>ijk</sub>. The interaction term is the question "does this factor help everywhere, or only here?". A benchmark row cannot answer it; a factorial design can.</p>`;
+  h += `<div class="toolbar"><label class="small">factor A <select data-act="expFA">${Object.entries(FACTORS).map(([k, v]) => `<option value="${k}" ${fa === k ? "selected" : ""}>${v}</option>`).join("")}</select></label><label class="small">factor B <select data-act="expFB">${Object.entries(FACTORS).map(([k, v]) => `<option value="${k}" ${fb === k ? "selected" : ""}>${v}</option>`).join("")}</select></label><span class="small">block: task · outcome: ${S.oracle} oracle</span></div>`;
+  const cells = new Map(); G.forEach(r => { const k = r[fa] + "|" + r[fb]; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(r); });
+  h += `<h3><span class="n">1</span> Cell means (pass rate, n) · ${esc(FACTORS[fa])} × ${esc(FACTORS[fb])}</h3><div class="tbl"><table><tr><th>${esc(FACTORS[fa])} \\ ${esc(FACTORS[fb])}</th>${Bv.map(x => `<th>${esc(x)}</th>`).join("")}</tr>`;
+  A.slice(0, 12).forEach(m => { h += `<tr><td><b>${esc(m)}</b></td>${Bv.map(x => { const rs = cells.get(m + "|" + x); if (!rs) return `<td class="small">—</td>`; const c = rs.filter(r => r[key]).length; const w = wilson(c, rs.length); const k = m + "|" + x; return `<td><span class="cellpick ${S.expA === k ? "on" : ""}" data-act="expA" data-k="${esc(k)}" title="click: set as A">${pct(c / rs.length, 0)} <span class="small">n=${rs.length}</span></span><span class="cellpick ${S.expB === k ? "on" : ""}" data-act="expB" data-k="${esc(k)}" title="click: set as B">B</span><div class="small">${ciText(w[0], w[1])}</div></td>`; }).join("")}</tr>`; });
+  h += `</table></div>`;
+  if (A.length >= 2 && Bv.length >= 2 && fa !== fb) {
+    const series = A.slice(0, 8).map((m, i) => ({ name: m, color: SERIES[i % SERIES.length], points: Bv.map((x, j) => { const rs = cells.get(m + "|" + x); return rs ? [j, passRate(rs, key)] : null; }).filter(Boolean) }));
+    const balanced = Bv.filter(x => A.every(m => cells.has(m + "|" + x))); const balA = A.filter(m => balanced.every(x => cells.has(m + "|" + x)));
+    const f = balanced.length >= 2 && balA.length >= 2 ? factorial(G.filter(r => balanced.includes(r[fb]) && balA.includes(r[fa])), fa, fb, "task_id", key) : null;
+    h += `<h3><span class="n">2</span> Interaction plot and variance decomposition${f && (balanced.length < Bv.length || balA.length < A.length) ? ` <span class="small">(decomposition on the balanced subset: ${esc(balA.join(", "))} × ${esc(balanced.join(", "))})</span>` : ""}</h3><div class="row"><div class="col">${svgLines(series, { xticks: Bv.map((_, j) => j), xfmt: j => Bv[j], ymax: 1, xlabel: FACTORS[fb], h: 260, w: 520 })}<div class="small">Parallel lines: the effect of ${esc(FACTORS[fb])} transfers across ${esc(FACTORS[fa])} levels (additive). Crossing lines: it is level-specific and a single-level ablation would mislead.</div></div>`;
+    if (f) h += `<div class="col"><div class="tbl"><table><tr><th>term</th><th class="num">SS</th><th class="num">df</th><th class="num">MS</th><th class="num">F</th><th class="num">share of SS</th></tr>${f.rows.map(r => `<tr><td>${esc(r.term)}</td><td class="num">${fmt(r.ss, 2)}</td><td class="num">${r.df}</td><td class="num">${fmt(r.ms, 4)}</td><td class="num">${fmt(r.F, 2)}</td><td class="num"><b>${pct(r.share, 1)}</b></td></tr>`).join("")}</table></div><div class="small">n = ${f.n} runs · grand mean ${fmt(f.mu, 3)}. The residual is run-to-run noise inside a cell; the task block is the difficulty spread. Whatever is left for the two factors is what a leaderboard reports as if it were everything.</div></div>`;
+    h += `</div>`;
+    // contrasts within each A level
+    if (fb !== "task_id") { h += `<h3><span class="n">3</span> All pairwise contrasts of ${esc(FACTORS[fb])}, paired over tasks, within each ${esc(FACTORS[fa])}</h3><div class="tbl"><table><tr><th>${esc(FACTORS[fa])}</th><th>contrast (B − A)</th><th class="num">Δ</th><th class="num">95% task-bootstrap</th><th class="num">tasks</th><th>verdict</th></tr>`; let nC = 0;
+      A.slice(0, 6).forEach(m => { for (let i = 0; i < Bv.length; i++) for (let j = i + 1; j < Bv.length; j++) { const a = cells.get(m + "|" + Bv[i]), b = cells.get(m + "|" + Bv[j]); if (!a || !b) continue; const p = pairedBootstrap(a, b, key); if (!p.n) continue; nC++; const covers = p.lo <= 0 && p.hi >= 0; h += `<tr><td>${esc(m)}</td><td>${esc(Bv[j])} − ${esc(Bv[i])}</td><td class="num">${(p.mean >= 0 ? "+" : "") + pct(p.mean, 1)}</td><td class="num">${ciText(p.lo, p.hi)}</td><td class="num">${p.n}</td><td>${covers ? '<span class="badge na">covers zero</span>' : `<span class="badge ${p.mean > 0 ? "ok" : "bad"}">${p.mean > 0 ? "B higher" : "A higher"}</span>`}</td></tr>`; } });
+      h += `</table></div><p class="small">${nC} contrasts. With ${nC} comparisons at 95%, expect about ${fmt(nC * 0.05, 1)} to exclude zero by chance; a Bonferroni-adjusted interval would be at ${nC ? (100 - 5 / nC).toFixed(1) : 95}%.</p>`; }
+  } else h += `<div class="callout">The factorial needs at least two levels of each factor in the filter (and two different factors).</div>`;
+  const a = S.expA && cells.get(S.expA), b = S.expB && cells.get(S.expB);
+  h += `<h3><span class="n">4</span> Can we conclude A &gt; B?</h3>`;
+  if (!a || !b) return h + `<p class="small">Click a cell above to set A, the "B" tag next to another to set B.</p>`;
+  const ca = a.filter(r => r[key]).length, cb = b.filter(r => r[key]).length, pa = ca / a.length, pb = cb / b.length, wa = wilson(ca, a.length), wb = wilson(cb, b.length);
+  const paired = pairedBootstrap(b, a, key); const need = powerN(pa, pb);
+  h += `<div class="tiles">${tile(`${ca}/${a.length} = ${pct(pa, 0)}`, "A: " + S.expA.replace("|", " × "), "Wilson " + ciText(wa[0], wa[1]))}${tile(`${cb}/${b.length} = ${pct(pb, 0)}`, "B: " + S.expB.replace("|", " × "), "Wilson " + ciText(wb[0], wb[1]))}${tile((pa - pb >= 0 ? "+" : "") + pct(pa - pb, 1), "A − B, paired over tasks", paired.n ? "95% " + ciText(-paired.hi, -paired.lo) + " · " + paired.n + " tasks" : "no shared tasks")}${tile(Number.isFinite(need) ? ints(need) + " per arm" : "∞", "runs needed to detect this difference", "two-proportion, α = 0.05, power 0.8")}</div>`;
+  const overlap = wa[0] <= wb[1] && wb[0] <= wa[1];
+  h += `<div class="callout ${overlap ? "" : "teal"}">${a.length === 1 && b.length === 1 ? "One run each: 1/1 versus 0/1 looks like 100% versus 0%. Wilson says " + ciText(wa[0], wa[1]) + " versus " + ciText(wb[0], wb[1]) + ". Nothing can be concluded." : (overlap ? "The intervals overlap and the paired interval " + (paired.n && (-paired.hi <= 0 && -paired.lo >= 0) ? "covers zero" : "is wide") + ". At this n the honest answer is: not yet. The number of runs it would take is on the right." : "The intervals separate. Report the paired difference with its interval, the n, and the cell definition, not the two point estimates.")}</div>`;
+  // power curve + wrong-winner simulation
+  const base = Math.max(0.05, Math.min(0.95, pa)); const deltas = [0.02, 0.03, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3]; const pts = deltas.map(d => [d, Math.min(5000, powerN(base, Math.max(0.01, Math.min(0.99, base - d))))]);
+  const ta = taskTable(a, key), tb = taskTable(b, key); const shared = Object.keys(ta).filter(t => tb[t]); const pAt = shared.map(t => ta[t].p), pBt = shared.map(t => tb[t].p);
+  h += `<div class="row"><div class="col">${svgLines([{ name: `runs per arm at power 0.8 (baseline p = ${fmt(base, 2)})`, color: "#E4572E", points: pts }], { xlabel: "difference in pass rate to detect", xticks: deltas, xfmt: d => pct(d), yfmt: y => ints(y), h: 240, w: 480, hline: a.length })}<div class="small">The dashed line is the n you have per arm now. Everything to the left of where the curve crosses it is invisible to this experiment.</div></div>`;
+  if (shared.length >= 2) { const ks = [1, 2, 3, 5, 10]; const sims = ks.map(k => ({ k, ...wrongWinner(pAt, pBt, k) })); h += `<div class="col narrow"><h4>How often does the wrong arm win? (Monte-Carlo, ${shared.length} shared tasks, per-task p from the data)</h4><div class="tbl"><table><tr><th class="num">repeats per task</th><th class="num">wrong winner</th><th class="num">tie</th></tr>${sims.map(s => `<tr><td class="num">${s.k}</td><td class="num"><b>${pct(s.wrong, 1)}</b></td><td class="num">${pct(s.ties, 1)}</td></tr>`).join("")}</table></div><div class="small">Draw Bernoulli outcomes per task with each arm's observed per-task rate, k repeats, 2,000 simulations; count how often the arm with the lower true mean ends up ahead. With one repeat, that number is the leaderboard's error rate on this pair.</div></div>`; }
+  h += `</div>`;
+  return h;
+}
+
+// ============================================================ 11. Report card
+function reportMd() {
+  const R = filtered(), key = oracleKey(); const G = graded(R, key); if (!G.length) return "No graded runs in filter.";
+  const agg = aggregate(R, key), tt = agg.tt, tasks = Object.keys(tt), ci = bootstrapCI(tasks.map(t => tt[t].p));
+  const hids = uniq(R.map(r => r.harness_id)), models = uniq(R.map(r => r.model)); const hcfg = B.harnesses[hids[0]] || {};
+  const strong = aggregate(R, "strong_pass"), vis = aggregate(R, "visible_pass"), hid = aggregate(R, "hidden_pass");
+  const L = [];
+  L.push(`# Evaluation report card`, ``, `Generated ${new Date().toISOString().slice(0, 16).replace("T", " ")} by AgentLab Console from ${uniq(R.map(r => r.results)).join(", ")}`, ``);
+  L.push(`## 1. The cell (what exactly was measured)`, ``, `| field | value |`, `|---|---|`, `| model(s) | ${models.join(", ")} |`, `| harness(es) | ${hids.join(", ")} |`);
+  if (hids.length === 1) L.push(`| harness config | tools: ${(hcfg.tools || []).join(", ")}; policy: ${hcfg.policy}; max_steps: ${hcfg.max_steps}; context_window: ${hcfg.context_window || "full"}; temperature: ${hcfg.temperature}; system prompt ${(hcfg.system_prompt || "").length} chars (full text in the first span of every ledger) |`);
+  L.push(`| tasks | ${tasks.length} (${tasks.slice(0, 20).join(", ")}${tasks.length > 20 ? ", …" : ""}) |`, `| protocol | ${Math.max(...R.map(r => r.repeat_index + 1))} repeats per task; oracle = ${S.oracle} test suite on a pristine copy of the workspace |`, `| runs | ${R.length} (${G.length} graded under this oracle) |`, ``);
+  L.push(`## 2. Outcome (as a distribution, not a number)`, ``, `| metric | value |`, `|---|---|`, `| pass@1 (mean over tasks) | ${fmt(agg.pass1, 3)}  95% task-bootstrap CI [${fmt(ci[0], 3)}, ${fmt(ci[1], 3)}] |`);
+  [2, 3, 5].forEach(k => { if (agg["pass@" + k] != null) L.push(`| pass@${k} / pass^${k} | ${fmt(agg["pass@" + k], 3)} / ${fmt(agg["pass^" + k], 3)} |`); });
+  L.push(`| flip rate (tasks with mixed outcomes) | ${fmt(flipRate(R, key))} |`, `| pass@1 under visible / hidden / strengthened tests | ${vis ? fmt(vis.pass1, 3) : "n/a"} / ${hid ? fmt(hid.pass1, 3) : "n/a"} / ${strong ? fmt(strong.pass1, 3) : "n/a"} |`, `| exit reasons | ${exitMix(R).map(([k, v]) => `${k}=${fmt(v)}`).join(", ")} |`, ``);
+  L.push(`Per task:`, ``, `| task | n | pass@1 | Wilson 95% | pass^3 |`, `|---|---|---|---|---|`);
+  tasks.slice(0, 40).forEach(t => { const v = tt[t], w = wilson(v.c, v.n); L.push(`| ${t} | ${v.n} | ${fmt(v.p)} | [${fmt(w[0])}, ${fmt(w[1])}] | ${v.n >= 3 ? fmt(passPowK(v.c, v.n, 3)) : "n/a"} |`); });
+  L.push(``, `## 3. Conduct (from the ledger)`, ``, `| metric | value |`, `|---|---|`, `| runs with ≥1 boundary event | ${fmt(boundaryAny(R))} |`, `| runs that modified tests | ${fmt(mean(R.map(r => r.tests_modified ? 1 : 0)))} |`, `| runs that verified after their last edit | ${fmt(verifiedRate(R))} |`, `| runs that never ran tests | ${fmt(mean(R.map(r => (featOf(r).n_test || 0) + (featOf(r).n_bash || 0) === 0 ? 1 : 0)))} |`, ``);
+  L.push(`## 4. Cost`, ``, `| metric | value |`, `|---|---|`, `| mean tokens per run | ${ints(mean(R.map(tokOf)))} |`, `| tokens per solve | ${ints(tokensPerSolve(R, key))} |`, `| mean cost per run | ${usd(mean(R.map(r => r.cost_usd || 0)))} |`, `| cost of pass | ${usd(costOfPass(R, key))} |`, ``);
+  const top = attribution(R, key).sort((a, b) => b.ochiai - a.ochiai).slice(0, 3);
+  L.push(`## 5. Integrity checks`, ``, `- self-report vs oracle: ${fmt(mean(R.filter(r => r.visible_pass != null && r.hidden_pass != null).map(r => r.visible_pass && !r.hidden_pass ? 1 : 0)), 3)} of runs pass the visible tests and fail the hidden ones`, `- weak oracle: ${fmt(mean(R.filter(r => r.hidden_pass != null && r.strong_pass != null).map(r => r.hidden_pass && !r.strong_pass ? 1 : 0)), 3)} of runs pass the hidden tests and fail the strengthened ones`, `- task probes present: ${Object.values(B.tasks).filter(t => t.probe !== "none" && tasks.includes(t.id)).map(t => `${t.id} (${t.probe})`).join(", ") || "none"}`, `- top trajectory features by Ochiai: ${top.map(f => `${f.id} (${fmt(f.ochiai, 2)}; in ${pct(f.rf)} of failures, ${pct(f.rp)} of successes)`).join("; ")}`, ``);
+  if (S.qSaved.length) { L.push(`## 5b. Saved trajectory queries`, ``, `| query | regex | matches | pass in | pass out | risk ratio |`, `|---|---|---|---|---|---|`); S.qSaved.forEach(sq => { const m = queryMatcher(sq); if (!m.fn) return; const st = predicateStats(R, m.fn, key); L.push(`| ${sq.name || "(unnamed)"} | \`${sq.re}\` | ${st.matches.length} | ${fmt(st.passIn)} | ${fmt(st.passOut)} | ${Number.isFinite(st.rr.rr) ? fmt(st.rr.rr, 2) : "n/a"} |`); }); L.push(``); }
+  L.push(`## 6. What this card does not tell you`, ``, `- whether the produced code is secure (no security oracle was run)`, `- whether the tasks are contaminated or leaked beyond the probes above`, `- whether the ranking of harnesses would hold on a different model (see the Experiment view for the interaction term)`, `- anything about tasks outside this set; the interval is over these tasks resampled, not over the population of issues`, ``);
+  return L.join("\n");
+}
+function vReport() {
+  const md = reportMd();
+  return `<h2>The report card</h2><p class="claim">The lecture's closing recipe as an artefact. It is generated from the current filter, so change the oracle or the harness and regenerate. Copy it into your notes; the lab hand-in is this text plus your answers.</p><div class="toolbar"><button class="btn" data-act="copy">Copy Markdown</button><button class="btn sec" data-act="csv">Export runs as CSV</button><span class="small" id="copy_msg"></span></div><textarea class="md" id="report_md" readonly>${esc(md)}</textarea>`;
+}
+
+// ============================================================ help drawer
+function helpHtml() {
+  return `<div class="drawer" id="drawer"><button class="btn small sec close" data-act="help">close</button><h2>Formulas and shortcuts</h2>
+  <dl>
+  <dt>Cell</dt><dd>(model, harness, task, environment, budget, oracle). A run is one draw from the cell's distribution; the randomness R is what repeats sample.</dd>
+  <dt>pass@1</dt><dd>mean over tasks of the per-task pass rate c/n. Reported with a task-bootstrap interval: resample tasks with replacement, recompute the mean, take the 2.5th and 97.5th percentiles.</dd>
+  <dt>Wilson interval</dt><dd><span class="mono">(p̂ + z²/2n ± z√(p̂(1−p̂)/n + z²/4n²)) / (1 + z²/n)</span>. Unlike Wald it does not collapse to a point at p̂ = 0 or 1.</dd>
+  <dt>pass@k, pass^k</dt><dd><span class="mono">pass@k = 1 − C(n−c, k)/C(n, k)</span> (at least one of k passes; Chen et al. 2021). <span class="mono">pass^k = C(c, k)/C(n, k)</span> (all k pass; τ-bench). Both unbiased for any n ≥ k.</dd>
+  <dt>Paired Δ<sub>H</sub></dt><dd>mean over tasks of (B's per-task rate − A's per-task rate), tasks resampled for the interval. Pairing removes the task-difficulty variance from the comparison.</dd>
+  <dt>Cost of pass</dt><dd>mean cost per run ÷ pass rate: what one correct answer costs once failures are paid for. Agency tax: cost of pass relative to a reference harness.</dd>
+  <dt>Tokens per solve</dt><dd>total tokens across all runs ÷ number of passing runs.</dd>
+  <dt>Ochiai</dt><dd><span class="mono">e_f / √(F · (e_f + e_p))</span> with e_f, e_p the failing and passing runs that carry the feature and F all failing runs. Tarantula: <span class="mono">(e_f/F) / (e_f/F + e_p/P)</span>. Fault localisation formulas, with runs as the spectrum.</dd>
+  <dt>Risk ratio</dt><dd>P(fail | feature) / P(fail | no feature), with a log-normal 95% interval.</dd>
+  <dt>Cohen's κ</dt><dd><span class="mono">(p_o − p_e)/(1 − p_e)</span>: agreement beyond chance. 0 is chance, 1 is perfect.</dd>
+  <dt>Sensitivity, specificity</dt><dd>of one oracle against another treated as truth: P(pass | truly pass), P(fail | truly fail).</dd>
+  <dt>Two-factor decomposition</dt><dd><span class="mono">SS_total = SS_A + SS_B + SS_AB + SS_task + SS_cell×task + SS_residual</span>, balanced design, textbook sums of squares. Shares are SS / SS_total.</dd>
+  <dt>Runs per arm</dt><dd><span class="mono">n ≈ (z_{1−α/2} + z_{1−β})² [p_A(1−p_A) + p_B(1−p_B)] / (p_A − p_B)²</span>, α = 0.05, power 0.8.</dd>
+  <dt>Predicates</dt><dd>P_verify: a test after the last edit. G(edit ⇒ F test): every edit eventually tested (LTL). P_scope: no edit under tests/. read ≺ write: every written file was read first. ¬loop: no identical (tool, args) call repeated with no edit in between.</dd>
+  <dt>Action alphabet</dt><dd>L list_files · R read/view · F search · W write_file · E edit · T run tests · B bash/other · S submit. Queries are regular expressions over this string.</dd>
+  <dt>Edit distance</dt><dd>Levenshtein distance between two action strings; clustering is average-linkage on it.</dd>
+  </dl>
+  <h3>Keyboard</h3><p><span class="kbd">1</span>…<span class="kbd">9</span> <span class="kbd">0</span> <span class="kbd">-</span> <span class="kbd">=</span> switch view · <span class="kbd">j</span>/<span class="kbd">k</span> next/previous run in the viewer · <span class="kbd">m</span> add the open run to the selection · <span class="kbd">?</span> this drawer · <span class="kbd">t</span> theme · <span class="kbd">Esc</span> close.</p>
+  <h3>URL</h3><p>The address bar carries the view, the filters, the oracle and the selected run, so a link opens the same picture on another machine that has the same export.</p></div>`;
+}
+
+// ---- app.js
+// ============================================================ shell
+function renderShell() {
+  const tab = TABS.find(t => t[0] === S.tab) || TABS[0];
+  $("strip").innerHTML = STRIP.map((b, i) => `<span class="box ${tab[2] === b ? "on" : ""}">${b}</span>${i < STRIP.length - 1 ? '<span class="arrow">→</span>' : ""}`).join("");
+  $("tabs").innerHTML = TABS.map(t => `${t[4] ? `<span class="grp">${t[4]}</span>` : ""}<button class="${S.tab === t[0] ? "on" : ""}" data-act="tab" data-v="${t[0]}">${t[1]}<kbd>${t[3]}</kbd></button>`).join("");
+  const chips = (label, key, values) => values.length <= 1 ? "" : `<div class="fgroup"><label>${label} ${S[key].size ? `<span class="chip pin" data-act="chipClear" data-k="${key}" style="padding:0 6px;font-size:10px">clear</span>` : ""}</label><div class="chips">${values.map(v => `<span class="chip ${S[key].has(v) ? "on" : ""}" data-act="chip" data-k="${key}" data-v="${esc(v)}">${esc(v)}</span>`).join("")}</div></div>`;
+  const allTasks = uniq(B.runs.map(r => r.task_id)).sort();
+  const taskChips = allTasks.length <= 24 ? chips("task", "tasks", allTasks) : `<div class="fgroup"><label>task ${S.tasks.size ? `<span class="chip pin" data-act="chipClear" data-k="tasks" style="padding:0 6px;font-size:10px">clear</span>` : ""}</label><div class="chips"><select data-act="taskPick" style="font-size:12px;padding:2px 6px"><option value="">${allTasks.length} tasks: pick one</option>${allTasks.map(t => `<option ${S.tasks.has(t) ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></div></div>`;
+  $("filters").innerHTML = chips("results", "results", uniq(B.runs.map(r => r.results))) + chips("model", "models", uniq(B.runs.map(r => r.model))) + chips("harness", "harnesses", uniq(B.runs.map(r => r.harness_id))) + taskChips
+    + `<div class="fgroup"><label>oracle</label><div class="chips">${[["visible", "visible tests"], ["hidden", "hidden tests"], ["strong", "strengthened tests"]].map(([v, l]) => `<span class="chip oracle ${S.oracle === v ? "on" : ""}" data-act="oracle" data-v="${v}">${l}</span>`).join("")}</div></div>`;
+  const n = filtered().length;
+  $("meta").textContent = `${n === B.runs.length ? B.runs.length : n + " of " + B.runs.length} runs · ${Object.keys(B.harnesses).length} harnesses · ${Object.keys(B.tasks).length} tasks · data ${B.generated_at}`;
+  const live = $("live"); live.className = "live" + (MODE === "server" ? " on" : ""); live.querySelector("span").textContent = MODE === "server" ? `live · ${B.running.length} running` : "static export";
+}
+function renderMain() {
+  const views = { overview: vOverview, board: vBoard, harness: vHarness, traj: vTraj, patterns: vPatterns, queries: vQueries, dist: vDist, attr: vAttr, tele: vTele, integ: vInteg, exp: vExp, report: vReport };
+  const t0 = performance.now();
+  try { $("main").innerHTML = (views[S.tab] || vOverview)(); }
+  catch (e) { $("main").innerHTML = `<div class="callout">render error in view "${esc(S.tab)}": ${esc(e.message)}</div><pre>${esc(e.stack)}</pre>`; console.error(e); }
+  if (S.hl != null) { const el = $("sp_" + S.hl); if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  const dt = performance.now() - t0; if (dt > 50) console.debug(`render ${S.tab} ${dt.toFixed(0)} ms`);
+  const d = $("drawer"); if (S.help && !d) document.body.insertAdjacentHTML("beforeend", helpHtml()); else if (!S.help && d) d.remove();
+  syncHash();
+}
+function render() { renderShell(); renderMain(); }
+function go(tab) { S.tab = tab; S.hl = null; window.scrollTo(0, 0); render(); }
+
+// ============================================================ events
+document.addEventListener("click", (ev) => {
+  const el = ev.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act;
+  if (act === "tab") go(el.dataset.v);
+  else if (act === "chip") { const set = S[el.dataset.k]; set.has(el.dataset.v) ? set.delete(el.dataset.v) : set.add(el.dataset.v); S.listPage = 0; render(); }
+  else if (act === "chipClear") { S[el.dataset.k].clear(); render(); }
+  else if (act === "oracle") { S.oracle = el.dataset.v; render(); }
+  else if (act === "sel") { if (ev.shiftKey || ev.target.closest('[data-act="multiToggle"]')) return; S.sel = el.dataset.key; S.cmp = null; S.hl = null; S.tab = "traj"; S.trajTab = "viewer"; window.scrollTo(0, 0); render(); loadDetail(S.sel); }
+  else if (act === "cellsel") { const [res, model, hid] = el.dataset.key.split("|"); if (model) { S.models = new Set([model]); S.harnesses = new Set([hid]); if (res && res !== model) S.results = new Set([res]); } render(); }
+  else if (act === "trajTab") { S.trajTab = el.dataset.v; S.hl = null; render(); }
+  else if (act === "trajSort") { S.trajSort = el.dataset.v; renderMain(); }
+  else if (act === "page") { S.listPage = Math.max(0, S.listPage + Number(el.dataset.v)); renderMain(); }
+  else if (act === "nav") { const R = listRows(filtered()); const i = R.findIndex(r => r.key === S.sel); const j = i + Number(el.dataset.v); if (R[j]) { S.sel = R[j].key; S.hl = null; renderMain(); loadDetail(S.sel); } }
+  else if (act === "scroll") { S.hl = Number(el.dataset.seq); renderMain(); }
+  else if (act === "attrOpen") { S.attrOpen = S.attrOpen === el.dataset.id ? null : el.dataset.id; renderMain(); }
+  else if (act === "expA") { S.expA = el.dataset.k; renderMain(); }
+  else if (act === "expB") { S.expB = el.dataset.k; renderMain(); }
+  else if (act === "multiToggle") { ev.stopPropagation(); const k = el.dataset.key; S.multi.has(k) ? S.multi.delete(k) : S.multi.add(k); renderMain(); }
+  else if (act === "multiSet") { S.multi = new Set(el.dataset.keys.split(",").filter(Boolean)); S.tab = "traj"; S.trajTab = "multi"; window.scrollTo(0, 0); render(); }
+  else if (act === "multiOpen") { S.tab = "traj"; S.trajTab = "multi"; window.scrollTo(0, 0); render(); }
+  else if (act === "multiClear") { S.multi.clear(); renderMain(); }
+  else if (act === "multiPage") { const boxes = Array.from(document.querySelectorAll('input[data-act="multiToggle"]')); const all = boxes.every(b => S.multi.has(b.dataset.key)); boxes.forEach(b => all ? S.multi.delete(b.dataset.key) : S.multi.add(b.dataset.key)); renderMain(); }
+  else if (act === "jobsToggle") { S.jobsOpen = !S.jobsOpen; renderMain(); }
+  else if (act === "copy") { const ta = $("report_md"); ta.select(); try { navigator.clipboard.writeText(ta.value).then(() => { $("copy_msg").textContent = "copied"; }); } catch (e) { document.execCommand("copy"); $("copy_msg").textContent = "copied"; } }
+  else if (act === "csv") exportCsv();
+  else if (act === "runjson") { const r = runByKey(S.sel); if (r) downloadText(`${r.run_id}.json`, JSON.stringify({ summary: r, spans: spansOf(r), features: featOf(r) }, null, 1)); }
+  else if (act === "launch") launchRuns();
+  else if (act === "cancel") cancelJob(el.dataset.id);
+  else if (act === "saveHarness") saveHarness();
+  else if (act === "help") { S.help = !S.help; renderMain(); }
+  else if (act === "qex") { S.q = { ...S.q, re: el.dataset.re, name: el.dataset.name }; renderMain(); }
+  else if (act === "qsave") { readQueryForm(); if (!S.q.re && S.q.steps_min === "" && S.q.steps_max === "" && !S.q.exit) return; S.qSaved.push({ ...S.q }); store("queries", S.qSaved); renderMain(); }
+  else if (act === "qload") { S.q = { ...S.qSaved[Number(el.dataset.i)] }; renderMain(); }
+  else if (act === "qdel") { S.qSaved.splice(Number(el.dataset.i), 1); store("queries", S.qSaved); renderMain(); }
+  else if (act === "qexport") { readQueryForm(); S.qOpen = queryAsTest(S.q); renderMain(); }
+  else if (act === "qclose") { S.qOpen = null; renderMain(); }
+});
+document.addEventListener("click", (ev) => { // shift-click on a board cell adds to the selection
+  const el = ev.target.closest('.cell[data-act="sel"]'); if (!el || !ev.shiftKey) return; ev.preventDefault(); const k = el.dataset.key; S.multi.has(k) ? S.multi.delete(k) : S.multi.add(k); renderMain();
+}, true);
+document.addEventListener("change", (ev) => {
+  const el = ev.target.closest("[data-act],[data-q]"); if (!el) return;
+  if (el.dataset.q != null) { readQueryForm(); renderMain(); const again = document.querySelector(`[data-q="${el.dataset.q}"]`); if (again) again.focus(); return; }
+  const act = el.dataset.act;
+  if (act === "hA") { S.hA = el.value; renderMain(); }
+  else if (act === "hB") { S.hB = el.value; renderMain(); }
+  else if (act === "cmp") { S.cmp = el.value || null; renderMain(); }
+  else if (act === "trajOutcome") { S.trajOutcome = el.value; S.listPage = 0; renderMain(); }
+  else if (act === "trajTask") { S.trajTask = el.value; S.listPage = 0; renderMain(); }
+  else if (act === "thr") { S.thr[el.dataset.k] = Number(el.value); renderMain(); }
+  else if (act === "sortAttr") { S.sortAttr = el.value; renderMain(); }
+  else if (act === "patCell") { S.patCell = el.value; renderMain(); }
+  else if (act === "patTask") { S.patTask = el.value; renderMain(); }
+  else if (act === "patK") { S.patK = Number(el.value); renderMain(); }
+  else if (act === "expFA") { S.expFA = el.value; S.expA = S.expB = null; renderMain(); }
+  else if (act === "expFB") { S.expFB = el.value; S.expA = S.expB = null; renderMain(); }
+  else if (act === "preset") { S.preset = el.value; renderMain(); }
+  else if (act === "taskPick") { S.tasks = el.value ? new Set([el.value]) : new Set(); render(); }
+});
+document.addEventListener("input", (ev) => { const el = ev.target.closest("[data-q]"); if (el && el.dataset.q === "re") { readQueryForm(); } if (["l_provider", "l_model", "l_harness", "l_tasks", "l_repeats"].includes(ev.target.id)) { const est = launchEstimate(readLaunchForm()); const e = $("launch_est"); if (e) e.firstChild.textContent = `${est.n} runs · planning estimate ${est.cost ? usd(est.cost) : "$0"} (${est.note}). `; } });
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.matches("input,textarea,select")) { if (ev.key === "Enter" && ev.target.dataset.q != null) { readQueryForm(); renderMain(); } return; }
+  const map = Object.fromEntries(TABS.map(t => [t[3], t[0]]));
+  if (map[ev.key]) go(map[ev.key]);
+  else if (ev.key === "?") { S.help = !S.help; renderMain(); }
+  else if (ev.key === "Escape") { if (S.help) { S.help = false; renderMain(); } }
+  else if (ev.key === "t") cycleTheme();
+  else if ((ev.key === "j" || ev.key === "k") && S.sel) { const R = listRows(filtered()); const i = R.findIndex(r => r.key === S.sel); const j = i + (ev.key === "j" ? 1 : -1); if (R[j]) { S.sel = R[j].key; S.hl = null; if (S.tab !== "traj") { S.tab = "traj"; S.trajTab = "viewer"; render(); } else renderMain(); loadDetail(S.sel); } }
+  else if (ev.key === "m" && S.sel) { S.multi.has(S.sel) ? S.multi.delete(S.sel) : S.multi.add(S.sel); renderMain(); }
+});
+window.addEventListener("hashchange", () => { hashToState(); render(); });
+function readQueryForm() { document.querySelectorAll("[data-q]").forEach(el => { S.q[el.dataset.q] = el.value; }); }
+function readLaunchForm() { return { provider: $("l_provider").value, model: $("l_model").value.trim(), harness: $("l_harness").value.trim(), tasks: $("l_tasks").value.trim() || "all", repeats: Number($("l_repeats").value || 1), seed: Number($("l_seed").value || 0), out: $("l_out").value.trim(), base_url: $("l_base").value.trim() }; }
+
+// ============================================================ theme
+function applyTheme() { const t = S.theme; if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t); const b = $("btn_theme"); if (b) b.textContent = "◐ " + t; }
+function cycleTheme() { S.theme = S.theme === "auto" ? "dark" : S.theme === "dark" ? "light" : "auto"; store("theme", S.theme); applyTheme(); }
+$("btn_theme").addEventListener("click", cycleTheme);
+$("btn_help").addEventListener("click", () => { S.help = !S.help; renderMain(); });
+
+// ============================================================ exports
+function downloadText(name, text, mime = "text/plain") { try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); } catch (e) { alert("download blocked in this viewer; run the console locally to save files"); } }
+function exportCsv() { const R = filtered(); const cols = ["results", "run_id", "task_id", "harness_id", "model", "repeat_index", "exit_reason", "visible_pass", "hidden_pass", "strong_pass", "steps", "tool_calls", "edits", "lines_added", "lines_removed", "boundary_events", "tests_modified", "input_tokens", "output_tokens", "cost_usd", "wall_ms"]; const feat = ["sequence", "ran_after_last_edit", "read_before_write", "repeated_no_edit", "first_edit_step"]; const q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`; const lines = [cols.concat(feat).join(",")]; R.forEach(r => { const f = featOf(r); lines.push(cols.map(c => q(r[c])).concat(feat.map(c => q(f[c]))).join(",")); }); downloadText("agentlab_runs.csv", lines.join("\n"), "text/csv"); }
+
+// ============================================================ data: static bundle or live server
+let VERSION = null;
+async function loadBundle(force) {
+  if (window.__BUNDLE__) { B = window.__BUNDLE__; MODE = "static"; VERSION = B.version; return; }
+  const r = await fetch("/api/bundle" + (force ? "?force=1" : "")); B = await r.json(); MODE = "server"; VERSION = B.version;
+}
+async function loadDetail(key) {
+  if (MODE !== "server" || S.detail[key]) return;
+  const r = runByKey(key); if (!r) return;
+  try { const res = await fetch(`/api/run?results=${encodeURIComponent(r.results)}&id=${encodeURIComponent(r.run_id)}`); const d = await res.json(); if (!d.error) { S.detail[key] = d; if (S.sel === key && S.tab === "traj") renderMain(); } } catch (e) { console.warn(e); }
+}
+async function launchRuns() {
+  const spec = readLaunchForm(); $("launch_msg").textContent = "launching…";
+  try { const res = await fetch("/api/launch", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(spec) }); const j = await res.json(); $("launch_msg").textContent = j.error ? "error: " + j.error : `job ${j.id} started: ${j.cmd}`; setTimeout(refresh, 1200); }
+  catch (e) { $("launch_msg").textContent = "error: " + e.message; }
+}
+async function cancelJob(id) { try { await fetch("/api/jobs/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); setTimeout(refresh, 600); } catch (e) { console.warn(e); } }
+async function saveHarness() {
+  const body = { id: $("e_id").value.trim(), tools: $("e_tools").value.split(",").map(s => s.trim()).filter(Boolean), policy: $("e_policy").value, max_steps: Number($("e_steps").value), context_window: Number($("e_ctx").value), observation_chars: Number($("e_obs").value), temperature: Number($("e_temp").value), max_total_tokens: Number($("e_tok").value), system_prompt: $("e_prompt").value, notes: "made in the console. Prediction: " + ($("e_pred").value || "(none written)") };
+  store("pred." + body.id, $("e_pred").value);
+  try { const res = await fetch("/api/harness", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); const j = await res.json(); $("h_msg").textContent = j.error ? "error: " + j.error : `saved ${j.path}; launch it from the Board`; if (!j.error) { await loadBundle(true); render(); } }
+  catch (e) { $("h_msg").textContent = "error: " + e.message; }
+}
+let refreshing = false;
+async function refresh() {
+  if (MODE !== "server" || refreshing) return; refreshing = true;
+  try { const st = await (await fetch("/api/status")).json(); const running = st.jobs.some(j => j.status === "running");
+    if (st.version !== VERSION) { await loadBundle(false); render(); }
+    else { B.jobs = st.jobs; B.running = st.running; renderShell(); if (running && (S.tab === "board" || S.tab === "overview")) renderMain(); } }
+  catch (e) { console.warn("refresh failed", e); }
+  finally { refreshing = false; }
+}
+(async function boot() {
+  S.theme = load("theme", "auto"); applyTheme(); S.qSaved = load("queries", []);
+  try { await loadBundle(false); } catch (e) { $("main").innerHTML = `<div class="callout">Could not load data: ${esc(e.message)}. Start the server with <code>python -m harnesslab.core.serve</code> or open an exported file.</div>`; return; }
+  hashToState();
+  if (S.sel && !runByKey(S.sel)) S.sel = null;
+  render();
+  if (S.sel) loadDetail(S.sel);
+  if (MODE === "server") setInterval(refresh, 3000);
+})();
+
+</script>
+</body>
+</html>

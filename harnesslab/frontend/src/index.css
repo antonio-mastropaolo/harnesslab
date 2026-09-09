@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* ---- theme tokens: the single source of truth for both themes ---- */
+/* William & Mary deck design system.
+   Chrome (grounds, panels, rules, ink) is restricted to W&M green / white / gold.
+   Series and status colours stay chromatic so data remains readable -- a warning
+   mark is a signal, not a background. */
+:root, :root[data-theme="dark"] {
+  /* grounds: wm-green-800 / -600 / -500, rules in green-500 */
+  --t-bg: #0B2E22; --t-panel: #115740; --t-panel2: #1F4A3A; --t-line: #1F4A3A; --t-line2: #2F6B54;
+  /* ink on green: white, then wm-mist-100 / -500 */
+  --t-ink: #FFFFFF; --t-ink2: #C9DCD1; --t-ink3: #7FA08F;
+  /* series: lead with wm-mint and wm-gold, then distinct hues lightened for a green ground */
+  --t-s1: #7FD6A6; --t-s2: #B9975B; --t-s3: #6FB3E8; --t-s4: #E8A0C0; --t-s5: #C9A6E8; --t-s6: #E8886B; --t-s7: #9DB8A8; --t-s8: #E8D06B;
+  --t-good: #3FA57A; --t-warn: #D9A441; --t-serious: #E8886B; --t-critical: #E06A6A; --t-accent: #B9975B;
+  --t-good-ink: #7FD6A6; --t-warn-ink: #D9A441; --t-serious-ink: #E8886B; --t-critical-ink: #FF9A9A; --t-accent-ink: #B9975B; --t-s3-ink: #7FD6A6;
+  color-scheme: dark;
+}
+/* the projector default. Ground is white and panels are wm-panel -- never grey-blue,
+   never cream. Present.jsx selects this theme on first load. */
+:root[data-theme="light"] {
+  --t-bg: #FFFFFF; --t-panel: #F1F2F0; --t-panel2: #E6E8E4; --t-line: #DDDDDD; --t-line2: #C2C6C0;
+  --t-ink: #111111; --t-ink2: #333333; --t-ink3: #666666;
+  --t-s1: #115740; --t-s2: #8A6D33; --t-s3: #1F5FC4; --t-s4: #B03A68; --t-s5: #6A5ACD; --t-s6: #B8451A; --t-s7: #3FA57A; --t-s8: #9A6600;
+  --t-good: #1D6B00; --t-warn: #9A6600; --t-serious: #C9602F; --t-critical: #B32A2A; --t-accent: #8A6D33;
+  --t-good-ink: #1D6B00; --t-warn-ink: #9A6600; --t-serious-ink: #B5502A; --t-critical-ink: #B32A2A; --t-accent-ink: #8A6D33; --t-s3-ink: #115740;
+  color-scheme: light;
+}
+
+/* Deck chrome. The presentation bar and footer are brand furniture, not theme surfaces:
+   they stay W&M green with gold rules in BOTH themes, exactly as the seminar deck does. */
+:root {
+  --wm-green-900: #05170F; --wm-green-800: #0B2E22; --wm-green-600: #115740; --wm-green-500: #1F4A3A;
+  --wm-gold: #B9975B; --wm-gold-700: #8A6D33; --wm-mist-100: #C9DCD1; --wm-mist-500: #7FA08F;
+}
+
+@theme inline {
+  --font-sans: "Archivo", -apple-system, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --color-bg: var(--t-bg); --color-panel: var(--t-panel); --color-panel2: var(--t-panel2); --color-line: var(--t-line); --color-line2: var(--t-line2);
+  --color-ink: var(--t-ink); --color-ink2: var(--t-ink2); --color-ink3: var(--t-ink3);
+  --color-s1: var(--t-s1); --color-s2: var(--t-s2); --color-s3: var(--t-s3); --color-s4: var(--t-s4); --color-s5: var(--t-s5); --color-s6: var(--t-s6); --color-s7: var(--t-s7); --color-s8: var(--t-s8);
+  --color-good: var(--t-good); --color-warn: var(--t-warn); --color-serious: var(--t-serious); --color-critical: var(--t-critical); --color-accent: var(--t-accent);
+  --color-good-ink: var(--t-good-ink); --color-warn-ink: var(--t-warn-ink); --color-serious-ink: var(--t-serious-ink); --color-critical-ink: var(--t-critical-ink); --color-accent-ink: var(--t-accent-ink); --color-s3-ink: var(--t-s3-ink);
+}
+
+html, body, #root { height: 100%; }
+body { background: var(--t-bg); color: var(--t-ink); font-family: var(--font-sans); font-size: 13.5px; -webkit-font-smoothing: antialiased; }
+* { scrollbar-width: thin; scrollbar-color: var(--t-line2) transparent; }
+code, .mono { font-family: var(--font-mono); }
+
+.card { @apply bg-panel border border-line rounded-xl min-w-0; }
+.card-h { @apply px-4 pt-3 pb-2 flex items-baseline justify-between gap-3 flex-wrap; }
+.card-t { @apply text-[12px] font-semibold uppercase tracking-[0.08em] text-ink3; }
+.stat { @apply text-[26px] font-semibold tracking-tight tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: .75rem; }
+.btn { @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium bg-panel2 border border-line2 text-ink hover:border-ink3 transition-colors disabled:opacity-40 disabled:cursor-not-allowed; }
+.btn-primary { @apply bg-accent border-accent text-white hover:opacity-90; }
+.chip { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border; }
+.input { @apply bg-bg border border-line2 rounded-lg px-2.5 py-1.5 text-[12.5px] text-ink outline-none focus:border-accent w-full; }
+.tbl-wrap { @apply overflow-x-auto min-w-0; }
+.tbl { @apply w-full text-[12.5px]; }
+.tbl th { @apply text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-ink3 py-2 px-3 border-b border-line whitespace-nowrap; }
+.tbl td { @apply py-1.5 px-3 border-b border-line/60 tabular-nums; }
+.tbl tr:hover td { @apply bg-panel2/60; }
+.tbl-nowrap td { @apply whitespace-nowrap; }
+.kbd { font-family: var(--font-mono); @apply text-[11px] px-1.5 py-0.5 rounded bg-panel2 border border-line2 text-ink2; }
+.recharts-tooltip-wrapper { outline: none; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--t-accent) 50%, transparent);} 100% { box-shadow: 0 0 0 8px transparent;} }
+.live { animation: pulse-ring 1.4s ease-out infinite; }
+.fade-in { animation: fi .25s ease-out; }
+@keyframes fi { from { opacity: 0; transform: translateY(3px);} to { opacity: 1; transform: none;} }
+/* projector scale for Present mode */
+.present-body { zoom: 1.2; }
+.present-body .stats { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }

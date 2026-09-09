@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------- python
+__pycache__/
+*.pyc
+.venv/
+/build/
+/dist/
+*.egg-info/
+*.whl
+
+# ---------------------------------------------------------------- node
+node_modules/
+
+# ---------------------------------------------------------------- derived
+data/figures/
+data/judge/
+data/runs/mine*/
+data/runs/smoke/
+data/runs/test_import_tmp_*/
+# SQLite cache over data/runs/*/index.jsonl; rebuilt on demand
+data/.harnesslab_index.sqlite*
+data/.holdstill_index.sqlite*
+harnesslab/data/cache/
+harnesslab/frontend/test/out/
+harnesslab/frontend/test/rendered.txt
+# FUSE tombstones from the mounted working copy
+.fuse_hidden*
+
+# ---------------------------------------------------------------- secrets
+.env
+*.key
+openrouter.key
+
+# ---------------------------------------------------------------- not published
+# The write-up is kept out of the public artifact deliberately.
+paper/
+# Working plans and agent process notes, not deliverables.
+docs/superpowers/
+# NOT OURS TO PUBLISH: peer-review / citation-audit material about a third party's paper
+# (SonicOnEdge, IEEE TETC 2026). Unrelated to this tool and confidential by nature.
+sonic_on_edge_review/
+# Internal dev notes and the cross-session handoff (references local key paths and a key
+# fingerprint). Process exhaust, not deliverables.
+notes/
+docs/handoff-*.md
+docs/WORKLOG.md
+README.md.new
+# Session scratch and one-off snapshots.
+_to_delete/
+_incoming/
+# A stale nested duplicate of the package and a 39MB archive, both pending deletion.
+harnesslab/holdstill/
+harnesslab/Archive.zip
+*.tgz
+*.bundle
+
+# build artifacts
+harnesslab/frontend/dist/
+*.orig

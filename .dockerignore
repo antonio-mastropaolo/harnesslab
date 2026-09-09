@@ -1,0 +1,20 @@
+# Keep the build context small and reproducible.
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+harnesslab/frontend/node_modules
+harnesslab/frontend/dist
+data/figures
+data/runs/smoke
+data/runs/live
+data/runs/mine*
+data/.holdstill_index.sqlite*
+docs
+solutions
+*.whl
+build
+dist
+*.egg-info
+.venv
+venv
