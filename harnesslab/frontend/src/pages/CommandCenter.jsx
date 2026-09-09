@@ -9,7 +9,7 @@ export default function CommandCenter() {
   const { overview, events, results, setResults, reloadOverview, go } = useApp()
   const models = useFetch('/models', [overview?.key_present])
   const [sel, setSel] = useState({ models: ['mock'], harnesses: ['baseline'], tasks: [], repeats: 3, parallel: 4, max_cost_usd: 10 })
-  const [out, setOut] = useState('live')
+  const [out, setOut] = useState('mine')
   const [sentinel, setSentinel] = useState({ enabled: true, mode: 'intervene', threshold: 0.6, llm: { enabled: false, model: 'openai/gpt-5-mini' } })
   const [ab, setAb] = useState(true)
   const [busy, setBusy] = useState(false)
